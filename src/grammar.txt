@@ -1,0 +1,21 @@
+#
+# Installation Zone Grammar
+#
+# non-terminals are upprecase
+# terminals are lowercase
+#
+# The terminal symbols of this grammar are Vertical and Horizontal
+# Installation Zone Hypothesis (hzone and vzone)
+# as well as terminals that will be connected via installation zones
+# (socket, switch)
+
+DOOR [left,top,width,height] -> vzone(pos:left-150) vzone(pos:right+150)
+
+WINDOW [left,top,width,height] -> vzone(pos:left-150) vzone(pos:right+150)
+
+WALL [width,height] -> vzone(pos:left+150) vzone(pos:right-150) hzone(pos:t+300) hzone(pos:height-300)
+
+SOCKET [left,top,width,height] -> socket
+
+SWITCH [left,top,width,height] -> switch
+

@@ -1,0 +1,26 @@
+{
+  "WALL" : [
+    { "label" : "vzone", "attributes" : { "pos": "att.left+150" } },
+    { "label" : "vzone", "attributes" : { "pos": "att.left+att.width-150" } },
+    { "label" : "hzone", "attributes" : { "pos": "300" } },
+    { "label" : "hzone", "attributes" : { "pos": "att.height-300" } }
+  ],
+
+  "DOOR" : [
+    { "label" : "vzone", "attributes" : { "pos": "att.left-150" } },
+    { "label" : "vzone", "attributes" : { "pos": "att.left+att.width+150" } }
+  ],
+
+  "WINDOW" : [
+    { "label" : "vzone", "attributes" : { "pos":"att.left-150" } },
+    { "label" : "vzone", "attributes" : { "pos":"att.left+att.width+150" } }
+  ],
+
+  "SOCKET" : [
+    { "label" : "socket" }
+  ],
+
+  "SWITCH" : [
+    { "label" : "switch" }
+  ]
+}
