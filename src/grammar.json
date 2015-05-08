@@ -8,12 +8,17 @@
 
   "DOOR" : [
     { "label" : "vzone", "attributes" : { "pos": "att.left-150" } },
-    { "label" : "vzone", "attributes" : { "pos": "att.left+att.width+150" } }
+    { "label" : "vzone", "attributes" : { "pos": "att.left+att.width+150" } },
+    { "label" : "door" }
   ],
 
   "WINDOW" : [
     { "label" : "vzone", "attributes" : { "pos":"att.left-150" } },
     { "label" : "vzone", "attributes" : { "pos":"att.left+att.width+150" } }
+  ],
+
+  "WINDOW" : [
+    { "label" : "window" }
   ],
 
   "SOCKET" : [

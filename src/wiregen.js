@@ -4,6 +4,11 @@ var fs=require('fs')
 var path=require('path')
 var pkg=require( path.join(__dirname, 'package.json') );
 
+var svgexport = require('./svgexport');
+
+// globals
+var TerminalSymbols = [];
+
 // -----------------------------------------------------
 function readJSON(filename)
 {
@@ -11,24 +16,30 @@ function readJSON(filename)
 }
 
 // -----------------------------------------------------
+function isTerminal(symbol)
+{
+    return symbol.label.toLowerCase() == symbol.label;
+}
+
 function evaluateGrammarStep(symbols, grammar)
 {
     var result = [];
+    GrammarEvaluated = true;
     symbols.forEach(function (lhs)
         {
             var att = lhs.attributes;
-            var newsymbol;
 
             // a symbol is considered terminal if it is not defined in the grammar
             if (lhs.label in grammar)
             {
+                GrammarEvaluated = false;
                 var dbgtext=lhs.label + " => ";
                 var rule = grammar[lhs.label];
                 // rule is an array of symbols to create
                 rule.forEach( function(rhs)
                 {
                     // inherit attributes
-                    newsymbol = {
+                    var newsymbol = {
                         "label" : rhs.label,
                         "attributes" : JSON.parse(JSON.stringify(att))
                     };
@@ -39,18 +50,20 @@ function evaluateGrammarStep(symbols, grammar)
                         {
                            newsymbol.attributes[attname] = eval(rhs.attributes[attname]);
                         } );
-                    console.log(rhs.label + " " + JSON.stringify(newsymbol.attributes));
 
                     dbgtext += rhs.label + " ";
+                    if (isTerminal(newsymbol))  { TerminalSymbols.push(newsymbol); }
+                    else                        { result.push(newsymbol); }
+
                 } );
                 console.log(dbgtext);
             } else {
-                // terminal is just copied
-                newsymbol = lhs;
+                // rule not found
+                console.log("[ERROR] Rule %s not found", lhs.label);
             }
-            result.push(newsymbol);
         }
     );
+    return result;
 }
 
 
@@ -66,8 +79,8 @@ program
 
 // read semantic entities
 console.log('* reading semantic entities from %s', program.input);
-var entities = readJSON(program.input);
-console.log('parsed %d entities', entities.length);
+var symbols = readJSON(program.input);
+console.log('parsed %d entities', symbols.length);
 
 // read installation zone grammar
 console.log('reading installation zone grammar from %s', program.grammar);
@@ -75,6 +88,10 @@ var grammar = readJSON(program.grammar);
 console.log('parsed %d grammar rules', Object.keys(grammar).length);
 
 // evaluate the grammar
+while(symbols.length > 0)
+{
+    symbols = evaluateGrammarStep(symbols, grammar);
+}
 
-currentsymbols = evaluateGrammarStep(entities, grammar);
-console.log(currentsymbols);
+var svg=svgexport.ExportTerminalsToSVG(TerminalSymbols);
+fs.writeFileSync("result.svg", svg);
