@@ -5,6 +5,7 @@ var path=require('path')
 var pkg=require( path.join(__dirname, 'package.json') );
 
 var svgexport = require('./svgexport');
+var graph = require('./graph');
 
 // globals
 var TerminalSymbols = [];
@@ -95,3 +96,5 @@ while(symbols.length > 0)
 
 var svg=svgexport.ExportTerminalsToSVG(TerminalSymbols);
 fs.writeFileSync("result.svg", svg);
+
+var v = new graph.Vertex();
