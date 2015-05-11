@@ -102,10 +102,73 @@ while(symbols.length > 0)
 // - split all hzones by vzones and vice versa
 // - connect all midpoints of detections to the nearest line segment
 
+var G = new graph.Graph();
 
+// get bounding box
+var bb = new vec.AABB();
+TerminalSymbols.forEach(function (symbol)
+{
+    var att = symbol.attributes;
+    bb.insert(att.left,att.top);
+    bb.insert(att.left+att.width,att.top+att.height);
+});
 
+// create a edge for each hzone and vzone
 
+var hzones = [];
+var vzones = [];
 
+// test intersection of two edges
+var testIntersection = (G, e0, e1)
+{
+    var v0x = G[e0.v0].x, v0y=G[e0.v0].y,
+        v1x = G[e0.v1].x, v1y=G[e0.v1].y,
+        v2x = G[e1.v0].x, v2y=G[e1.v0].y,
+        v3x = G[e1.v1].x, v3y=G[e1.v1].y;
+    var det = (v1x-v0x)*(v2y-v3y)-(v2x-v3x)*(v1y-v0y);
+    var bx = v2x-v0x, by=v2y-v0y;
+
+    var t = ((v2y-v3y)*bx + (v3x-v2x)*by) / det;
+    var s = ((v2y-v3y)*bx + (v3x-v2x)*by) / det;
+    if (t>=0.0 && t<=1.0 && s>=0.0 && s<=1.0)
+    {
+        return new vec.Vec2(v0x+(v1x-v0x)*t, v0y+(v1y-v0x)*t);
+    }
+    return null;
+}
+
+TerminalSymbols.forEach(function (t)
+{
+    var att = t.attributes;
+    switch(t.label)
+    {
+        case 'hzone':
+        {
+            var v0 = new vec.Vec2(bb.bbmin.x, att.pos);
+            var v1 = new vec.Vec2(bb.bbmax.x, att.pos);
+            G.addEdge(v0, v1);
+            hzones.push({v0: v0._id, v1: v1._id});
+        }
+            break;
+        case 'vzone':
+        {
+            var v0 = new vec.Vec2(att.pos, bb.bbmin.y);
+            var v1 = new vec.Vec2(att.pos, bb.bbmax.y);
+            G.addEdge(v0, v1);
+            vzones.push({v0:v0._id,v1:v1._id});
+        }
+            break;
+    }
+});
+
+// create intersections
+vzones.forEach(function(vzone) {
+    // split hzones
+
+});
+
+var E = G.getEdges();
+console.log(E);
 
 // --------------------------------------------------------------------------------------------------------------------
 
