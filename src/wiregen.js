@@ -4,6 +4,7 @@ var fs=require('fs')
 var path=require('path')
 var pkg=require( path.join(__dirname, 'package.json') );
 
+var vec = require('./vec');
 var svgexport = require('./svgexport');
 var graph = require('./graph');
 
@@ -67,6 +68,7 @@ function evaluateGrammarStep(symbols, grammar)
     return result;
 }
 
+// --------------------------------------------------------------------------------------------------------------------
 
 
 // Parse command line options
@@ -94,7 +96,19 @@ while(symbols.length > 0)
     symbols = evaluateGrammarStep(symbols, grammar);
 }
 
+// --------------------------------------------------------------------------------------------------------------------
+// build graph from terminal symbols:
+// - create node at beginning and end of each installation zone
+// - split all hzones by vzones and vice versa
+// - connect all midpoints of detections to the nearest line segment
+
+
+
+
+
+
+// --------------------------------------------------------------------------------------------------------------------
+
 var svg=svgexport.ExportTerminalsToSVG(TerminalSymbols);
 fs.writeFileSync("result.svg", svg);
 
-var v = new graph.Vertex();
