@@ -126,6 +126,11 @@ var testIntersection = function (G, e0, e1)
         v2x = G[e1.v0].x, v2y=G[e1.v0].y,
         v3x = G[e1.v1].x, v3y=G[e1.v1].y;
     var det = (v1x-v0x)*(v2y-v3y)-(v2x-v3x)*(v1y-v0y);
+    if (det>=-1e-5 && det <=1e-5)
+    {
+        // lines parallel
+        return null;
+    }
     var bx = v2x-v0x, by=v2y-v0y;
 
     var t = ((v2y-v3y)*bx + (v3x-v2x)*by) / det;
@@ -135,7 +140,7 @@ var testIntersection = function (G, e0, e1)
         return new vec.Vec2(v0x+(v1x-v0x)*t, v0y+(v1y-v0x)*t);
     }
     return null;
-}
+};
 
 TerminalSymbols.forEach(function (t)
 {
