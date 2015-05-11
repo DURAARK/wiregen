@@ -119,7 +119,7 @@ var hzones = [];
 var vzones = [];
 
 // test intersection of two edges
-var testIntersection = (G, e0, e1)
+var testIntersection = function (G, e0, e1)
 {
     var v0x = G[e0.v0].x, v0y=G[e0.v0].y,
         v1x = G[e0.v1].x, v1y=G[e0.v1].y,
