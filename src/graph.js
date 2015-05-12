@@ -7,9 +7,31 @@ function isEmpty(obj) {
     return true;
 }
 
+function Edge()
+{
+    if (arguments.length == 2) {
+        if (parseInt(arguments[0]._id) < parseInt(arguments[1]._id)) {
+            this.v0 = arguments[0]._id;
+            this.v1 = arguments[1]._id;
+        } else {
+            this.v0 = arguments[1]._id;
+            this.v1 = arguments[0]._id;
+        }
+    } else {
+        var V=arguments[0].split(":");
+        this.v0 = V[0];
+        this.v1 = V[1];
+    }
+}
+Edge.prototype.toString = function()
+{
+    return this.v0+":"+this.v1;
+};
+
 function Graph()
 {
     this.N = {};
+    this.E = {};
     this.nodeid = 0;
 }
 Graph.prototype.newNodeID = function()
@@ -18,24 +40,52 @@ Graph.prototype.newNodeID = function()
     return id.toString();
 };
 
+Graph.prototype.checkVertex = function(v)
+{
+    // see if this vertex is already in the node list
+    for (n in this.N) {
+        if (this.N[n].equals(v)) {
+            return this.N[n];
+        }
+    }
+    if (!('_id' in v)) v['_id'] = this.newNodeID();
+    this.N[v._id] = v;
+    return v;
+};
+
 Graph.prototype.addEdge = function(v0, v1)
 {
     if (!('root' in this)) this['root'] = v0;
-    if (!('_id' in v0)) v0['_id'] = this.newNodeID();
-    if (!('_id' in v1)) v1['_id'] = this.newNodeID();
-    if (!('adjacent' in v0)) { v0['adjacent'] = {}; }
-    if (!('adjacent' in v1)) { v1['adjacent'] = {}; }
-    v0.adjacent[v1._id]=v1;
-    v1.adjacent[v0._id]=v0;
-    this.N[v0._id]=v0;
-    this.N[v1._id]=v1;
+    v0 = this.checkVertex(v0);
+    v1 = this.checkVertex(v1);
+    var edge = new Edge(v0,v1);
+    if (!(edge in this.E))
+    {
+        if (!('adjacent' in v0)) { v0['adjacent'] = {}; }
+        if (!('adjacent' in v1)) { v1['adjacent'] = {}; }
+        v0.adjacent[v1._id]=v1;
+        v1.adjacent[v0._id]=v0;
+        this.E[edge] = edge;
+    }
+    return edge;
 };
-Graph.prototype.removeEdge = function(v0, v1)
-{
-    delete v0.adjacent[v1._id];
-    delete v1.adjacent[v0._id];
-    if(isEmpty(v0.adjacent)) delete this.N[v0._id];
-    if(isEmpty(v1.adjacent)) delete this.N[v1._id];
+
+Graph.prototype.removeEdge = function() {
+    var edge;
+    if (arguments.length == 2) {
+        edge = new Edge(arguments[0], arguments[1]);
+    } else {
+        edge = arguments[0];
+    }
+    if (edge in this.E)
+    {
+        delete v0.adjacent[v1._id];
+        delete v1.adjacent[v0._id];
+        // remove dangling vertices
+        if(isEmpty(v0.adjacent)) delete this.N[v0._id];
+        if(isEmpty(v1.adjacent)) delete this.N[v1._id];
+        delete this.E[edge];
+    }
 };
 
 Graph.prototype.DFS = function(visitor, startnode)
@@ -61,36 +111,45 @@ Graph.prototype.DFS = function(visitor, startnode)
 
 Graph.prototype.getEdges = function()
 {
-    var edges = [];
-
-    edgeVisitor = function(node)
-    {
-        for(var a in node.adjacent)
-        {
-            var newEdge = true;
-            var edge = { v0: node._id, v1: a };
-            for (var eid in edges)
-            {
-                var e = edges[eid];
-                if (  (edge.v0==e.v0 && edge.v1==e.v1)
-                   || (edge.v0==e.v1 && edge.v1==e.v0) )
-                {
-                    newEdge=false;
-                    break;
-                }
-            }
-            if (newEdge) {
-                edges.push( edge );
-            }
-        }
-    };
-
-    this.DFS(edgeVisitor);
-
-    return edges;
+    result=[];
+    for (key in this.E)
+        result.push(this.E[key]);
+    return result;
 };
+
+//Graph.prototype.getEdges = function()
+//{
+//    var edges = [];
+//
+//    edgeVisitor = function(node)
+//    {
+//        for(var a in node.adjacent)
+//        {
+//            var newEdge = true;
+//            var edge = { v0: node._id, v1: a };
+//            for (var eid in edges)
+//            {
+//                var e = edges[eid];
+//                if (  (edge.v0==e.v0 && edge.v1==e.v1)
+//                   || (edge.v0==e.v1 && edge.v1==e.v0) )
+//                {
+//                    newEdge=false;
+//                    break;
+//                }
+//            }
+//            if (newEdge) {
+//                edges.push( edge );
+//            }
+//        }
+//    };
+//
+//    this.DFS(edgeVisitor);
+//
+//    return edges;
+//};
 
 module.exports =
 {
-    Graph : Graph
+    Graph : Graph,
+    Edge  : Edge
 };

@@ -17,6 +17,13 @@ function readJSON(filename)
     return JSON.parse(fs.readFileSync(filename, "utf8"));
 }
 
+function removeArrObj(array, object) {
+    var index = array.indexOf(objectt);
+    if (index > -1) {
+        array.splice(index, 1);
+    }
+}
+
 // -----------------------------------------------------
 function isTerminal(symbol)
 {
@@ -113,13 +120,9 @@ TerminalSymbols.forEach(function (symbol)
     bb.insert(att.left+att.width,att.top+att.height);
 });
 
-// create a edge for each hzone and vzone
-
-var hzones = [];
-var vzones = [];
 
 // test intersection of two edges
-var testIntersection = function (G, e0, e1)
+function testIntersection(G, e0, e1)
 {
     var v0x = G[e0.v0].x, v0y=G[e0.v0].y,
         v1x = G[e0.v1].x, v1y=G[e0.v1].y,
@@ -135,12 +138,54 @@ var testIntersection = function (G, e0, e1)
 
     var t = ((v2y-v3y)*bx + (v3x-v2x)*by) / det;
     var s = ((v2y-v3y)*bx + (v3x-v2x)*by) / det;
-    if (t>=0.0 && t<=1.0 && s>=0.0 && s<=1.0)
+    if (t>0.0 && t<1.0 && s>0.0 && s<1.0)
     {
         return new vec.Vec2(v0x+(v1x-v0x)*t, v0y+(v1y-v0x)*t);
     }
     return null;
 };
+
+
+function insertArrangementEdge(G, v0, v1)
+{
+    v0 = G.checkVertex(v0);
+    v1 = G.checkVertex(v1);
+    var splitEdges = [ new graph.Edge(v0,v1) ];
+    // split all edges that instersect with this edge
+    var doIntersection=true;
+    while(doIntersection)
+    {
+        var Continue = false;
+        for (e in G.E)
+        {
+            for (se in splitEdges)
+            {
+                var p = testIntersection(G, e, se );
+                // perform split
+                if (p != null)
+                {
+                    Continue = true;
+                    // split e: insert vertex in graph
+                    p = G.checkVertex(p);
+                    // remove edge from graph
+                    G.removeEdge(e);
+                    // add new edges in graph
+                    G.addEdge(e.v0,p);
+                    G.addEdge(p, e.v1);
+
+                    removeArrObj(splitEdges, se);
+                    splitEdges.push(new graph.Edge(se.v0,p));
+                    splitEdges.push(new graph.Edge(p,se.v1));
+                }
+            }
+            if (Continue==true) break;
+        }
+        if (Continue==false) {
+            doIntersection = false;
+        }
+    }
+}
+
 
 TerminalSymbols.forEach(function (t)
 {
@@ -151,26 +196,23 @@ TerminalSymbols.forEach(function (t)
         {
             var v0 = new vec.Vec2(bb.bbmin.x, att.pos);
             var v1 = new vec.Vec2(bb.bbmax.x, att.pos);
-            G.addEdge(v0, v1);
-            hzones.push({v0: v0._id, v1: v1._id});
+            //hzones.push(G.addEdge(v0, v1));
+            insertArrangementEdge(G, v0, v1);
         }
-            break;
+        break;
         case 'vzone':
         {
             var v0 = new vec.Vec2(att.pos, bb.bbmin.y);
             var v1 = new vec.Vec2(att.pos, bb.bbmax.y);
-            G.addEdge(v0, v1);
-            vzones.push({v0:v0._id,v1:v1._id});
+            //vzones.push(G.addEdge(v0, v1));
+            insertArrangementEdge(G, v0, v1);
         }
-            break;
+        break;
     }
 });
 
-// create intersections
-vzones.forEach(function(vzone) {
-    // split hzones
 
-});
+
 
 var E = G.getEdges();
 console.log(E);
