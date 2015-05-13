@@ -230,7 +230,7 @@ TerminalSymbols.forEach(function (t)
         break;
     }
 
-    fs.writeFileSync(util.format("step-%d.svg",i++), svgexport.ExportGraphToSVG(G));
+    //fs.writeFileSync(util.format("step-%d.svg",i++), svgexport.ExportGraphToSVG(G));
 
 });
 
@@ -240,6 +240,5 @@ console.log(E);
 
 // --------------------------------------------------------------------------------------------------------------------
 
-var svg=svgexport.ExportTerminalsToSVG(TerminalSymbols);
-fs.writeFileSync("result.svg", svg);
-
+fs.writeFileSync("terminals.svg", svgexport.ExportTerminalsToSVG(TerminalSymbols));
+fs.writeFileSync("graph.svg", svgexport.ExportGraphToSVG(G));
