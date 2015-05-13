@@ -18,9 +18,13 @@ function Edge()
             this.v1 = arguments[0]._id;
         }
     } else {
-        var V=arguments[0].split(":");
-        this.v0 = V[0];
-        this.v1 = V[1];
+        if (arguments.length==1) {
+            var V = arguments[0].split(":");
+            this.v0 = V[0];
+            this.v1 = V[1];
+        } else {
+            console.log("Uh Oh.");
+        }
     }
 }
 Edge.prototype.toString = function()
@@ -75,15 +79,16 @@ Graph.prototype.removeEdge = function() {
     if (arguments.length == 2) {
         edge = new Edge(arguments[0], arguments[1]);
     } else {
-        edge = arguments[0];
+        edge = new Edge(arguments[0]);
     }
     if (edge in this.E)
     {
+        var v0=this.N[edge.v0], v1=this.N[edge.v1];
         delete v0.adjacent[v1._id];
         delete v1.adjacent[v0._id];
         // remove dangling vertices
-        if(isEmpty(v0.adjacent)) delete this.N[v0._id];
-        if(isEmpty(v1.adjacent)) delete this.N[v1._id];
+        //if(isEmpty(v0.adjacent)) delete this.N[v0._id];
+        //if(isEmpty(v1.adjacent)) delete this.N[v1._id];
         delete this.E[edge];
     }
 };

@@ -2,6 +2,7 @@
 
 var fs=require('fs')
 var path=require('path')
+var util = require('util');
 var pkg=require( path.join(__dirname, 'package.json') );
 
 var vec = require('./vec');
@@ -18,7 +19,7 @@ function readJSON(filename)
 }
 
 function removeArrObj(array, object) {
-    var index = array.indexOf(objectt);
+    var index = array.indexOf(object);
     if (index > -1) {
         array.splice(index, 1);
     }
@@ -124,10 +125,10 @@ TerminalSymbols.forEach(function (symbol)
 // test intersection of two edges
 function testIntersection(G, e0, e1)
 {
-    var v0x = G[e0.v0].x, v0y=G[e0.v0].y,
-        v1x = G[e0.v1].x, v1y=G[e0.v1].y,
-        v2x = G[e1.v0].x, v2y=G[e1.v0].y,
-        v3x = G[e1.v1].x, v3y=G[e1.v1].y;
+    var v0x = G.N[e0.v0].x, v0y=G.N[e0.v0].y,
+        v1x = G.N[e0.v1].x, v1y=G.N[e0.v1].y,
+        v2x = G.N[e1.v0].x, v2y=G.N[e1.v0].y,
+        v3x = G.N[e1.v1].x, v3y=G.N[e1.v1].y;
     var det = (v1x-v0x)*(v2y-v3y)-(v2x-v3x)*(v1y-v0y);
     if (det>=-1e-5 && det <=1e-5)
     {
@@ -137,30 +138,43 @@ function testIntersection(G, e0, e1)
     var bx = v2x-v0x, by=v2y-v0y;
 
     var t = ((v2y-v3y)*bx + (v3x-v2x)*by) / det;
-    var s = ((v2y-v3y)*bx + (v3x-v2x)*by) / det;
+    var s = ((v0y-v1y)*bx + (v1x-v0x)*by) / det;
     if (t>0.0 && t<1.0 && s>0.0 && s<1.0)
     {
-        return new vec.Vec2(v0x+(v1x-v0x)*t, v0y+(v1y-v0x)*t);
+        return new vec.Vec2(v0x+(v1x-v0x)*t, v0y+(v1y-v0y)*t);
     }
     return null;
 };
 
+function edge2txt(G, e)
+{
+    return (G.N[e.v0].x + "," +G.N[e.v0].y + "-" + G.N[e.v1].x + "," + G.N[e.v1].y );
+}
 
 function insertArrangementEdge(G, v0, v1)
 {
     v0 = G.checkVertex(v0);
     v1 = G.checkVertex(v1);
-    var splitEdges = [ new graph.Edge(v0,v1) ];
+    var splitEdges = [ new graph.Edge(v0,v1).toString() ];
+
+    // simple case
+    if (Object.keys(G.E).length == 0)
+    {
+        G.addEdge(v0, v1);
+        return;
+    }
     // split all edges that instersect with this edge
     var doIntersection=true;
     while(doIntersection)
     {
         var Continue = false;
-        for (e in G.E)
+        for (var e in G.E)
         {
-            for (se in splitEdges)
+            var ge = new graph.Edge(e);
+            for (seid in splitEdges)
             {
-                var p = testIntersection(G, e, se );
+                var se = new graph.Edge(splitEdges[seid]);
+                var p = testIntersection(G, ge, se);
                 // perform split
                 if (p != null)
                 {
@@ -168,14 +182,14 @@ function insertArrangementEdge(G, v0, v1)
                     // split e: insert vertex in graph
                     p = G.checkVertex(p);
                     // remove edge from graph
-                    G.removeEdge(e);
+                    G.removeEdge(ge.toString());
                     // add new edges in graph
-                    G.addEdge(e.v0,p);
-                    G.addEdge(p, e.v1);
-
-                    removeArrObj(splitEdges, se);
-                    splitEdges.push(new graph.Edge(se.v0,p));
-                    splitEdges.push(new graph.Edge(p,se.v1));
+                    G.addEdge(G.N[ge.v0],p);
+                    G.addEdge(p, G.N[ge.v1]);
+                    removeArrObj(splitEdges, se.toString());
+                    splitEdges.push(new graph.Edge(G.N[se.v0], p).toString());
+                    splitEdges.push(new graph.Edge(p, G.N[se.v1]).toString());
+                    break;
                 }
             }
             if (Continue==true) break;
@@ -184,9 +198,15 @@ function insertArrangementEdge(G, v0, v1)
             doIntersection = false;
         }
     }
+    // insert split edges
+    for (seid in splitEdges)
+    {
+        var se = new graph.Edge(splitEdges[seid]);
+        G.addEdge(G.N[se.v0], G.N[se.v1]);
+    }
 }
 
-
+var i=0;
 TerminalSymbols.forEach(function (t)
 {
     var att = t.attributes;
@@ -209,9 +229,10 @@ TerminalSymbols.forEach(function (t)
         }
         break;
     }
+
+    fs.writeFileSync(util.format("step-%d.svg",i++), svgexport.ExportGraphToSVG(G));
+
 });
-
-
 
 
 var E = G.getEdges();
