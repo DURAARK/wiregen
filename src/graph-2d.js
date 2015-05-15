@@ -7,19 +7,37 @@ function removeArrObj(array, object) {
     if (index > -1) { array.splice(index, 1); }
 }
 
-// test intersection of two edges
-// solution of the system of equations of lines v0--v1 and v2--v3:
-// v0+(v1-v0)*t = v2+(v3-v2)*s
-function testIntersection(G, e0, e1)
+// test two graph edges for intersection
+function edgeIntersection(G, e0, e1)
 {
     var v0x = G.N[e0.v0].x, v0y=G.N[e0.v0].y,
         v1x = G.N[e0.v1].x, v1y=G.N[e0.v1].y,
         v2x = G.N[e1.v0].x, v2y=G.N[e1.v0].y,
         v3x = G.N[e1.v1].x, v3y=G.N[e1.v1].y;
+    return getIntersection(v0x,v0y,v1x,v1y,v2x,v2y,v3x,v3y);
+}
+
+function edgeAABBIntersection(G, e, rect)
+{
+    // get edge coordinates
+    var v0x = G.N[e.v0].x, v0y=G.N[e.v0].y,
+        v1x = G.N[e.v1].x, v1y=G.N[e.v1].y;
+    var l = rect.left, t = rect.top, r = rect.left+rect.width, b = rect.top+rect.height;
+    // intersection with line and bounding box equals to intersection with line and bounding lines
+    if (getIntersection(v0x,v0y,v1x,v1y, l,t,r,t) != null) return true;
+    if (getIntersection(v0x,v0y,v1x,v1y, l,b,r,b) != null) return true;
+    if (getIntersection(v0x,v0y,v1x,v1y, l,t,l,b) != null) return true;
+    if (getIntersection(v0x,v0y,v1x,v1y, r,t,r,b) != null) return true;
+}
+
+// test intersection of two edges
+// solution of the system of equations of lines v0--v1 and v2--v3:
+// v0+(v1-v0)*t = v2+(v3-v2)*s
+function getIntersection(v0x,v0y,v1x,v1y,v2x,v2y,v3x,v3y)
+{
     var det = (v1x-v0x)*(v2y-v3y)-(v2x-v3x)*(v1y-v0y);
     if (det>=-1e-5 && det <=1e-5)
-    {
-        // lines parallel
+    {   //  parallel lines
         return null;
     }
     var bx = v2x-v0x, by=v2y-v0y;
@@ -38,6 +56,7 @@ function edge2txt(G, e)
     return (G.N[e.v0].x + "," +G.N[e.v0].y + "-" + G.N[e.v1].x + "," + G.N[e.v1].y );
 }
 
+// insert an edge into the graph, calculate intersections with all other graph edges
 function insertArrangementEdge(G, v0, v1)
 {
     v0 = G.checkVertex(v0);
@@ -61,7 +80,7 @@ function insertArrangementEdge(G, v0, v1)
             for (seid in splitEdges)
             {
                 var se = new graph.Edge(splitEdges[seid]);
-                var p = testIntersection(G, ge, se);
+                var p = edgeIntersection(G, ge, se);
                 // perform split
                 if (p != null)
                 {
@@ -94,7 +113,8 @@ function insertArrangementEdge(G, v0, v1)
 }
 
 module.exports = {
-    //testIntersection : testIntersection,
+    getIntersection       : getIntersection,
     insertArrangementEdge : insertArrangementEdge,
+    edgeAABBIntersection  : edgeAABBIntersection
     //edge2txt : edge2txt
 };

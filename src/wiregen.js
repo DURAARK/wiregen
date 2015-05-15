@@ -47,10 +47,7 @@ while(Symbols.length > 0)
 }
 
 // --------------------------------------------------------------------------------------------------------------------
-// build graph from terminal symbols:
-// - create node at beginning and end of each installation zone
-// - split all hzones by vzones and vice versa
-// - connect all midpoints of detections to the nearest line segment
+// build installation zone graph
 
 var G = new graph.Graph();
 
@@ -63,8 +60,7 @@ TerminalSymbols.forEach(function (symbol)
     bb.insert(att.left+att.width,att.top+att.height);
 });
 
-// create hzones and vzones arrangement
-var i=0;
+// create initial arrangement graph from h and v zones
 TerminalSymbols.forEach(function (t)
 {
     var att = t.attributes;
@@ -90,9 +86,23 @@ TerminalSymbols.forEach(function (t)
     //fs.writeFileSync(util.format("step-%d.svg",i++), svgexport.ExportGraphToSVG(G));
 });
 
+// remove segments that overlap with openings
+TerminalSymbols.forEach(function (t) {
+    if (t.label=='door' || t.label=='window')
+    {
+        // test if any graph edge overlaps with the window
+        for (e in G.E)
+        {
+            if (graph2d.edgeAABBIntersection(G, G.E[e], t.attributes))
+            {
+                G.removeEdge(e);
+            }
+        }
+    }
+});
 
-var E = G.getEdges();
-console.log(E);
+
+// insert detections: insert as node if "near" to zone, connect to nearest zone otherwise
 
 // --------------------------------------------------------------------------------------------------------------------
 
