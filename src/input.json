@@ -2,7 +2,7 @@
   {
     "label": "WALL",
     "attributes": {
-      "wallid" : "wall01_1_01",
+      "id" : "wall01_1_01",
       "left" : 0,
       "top" : 0,
       "width" : 3000,

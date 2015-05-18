@@ -51,10 +51,66 @@ function getIntersection(v0x,v0y,v1x,v1y,v2x,v2y,v3x,v3y)
     return null;
 };
 
+// point - line distance
+// point (x0,y0) -> line (x1,y1)-(x2,y2)
+//function pointLineDistance(x0,y0,x1,y1,x2,y2) {
+    //var D = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)+(y2-y1));
+    //if (D>=-1e-5 && D <=1e-5)
+    //{   // degenerated line
+    //    return null;
+    //}
+    //return Math.abs((x2-x1)*(y1-y0)-(x1-x0)*(y2-y1)) / D;
+//}
+
+function pointEdgeDist(G, e, p)
+{
+    //return pointLineDistance(p.x, p.y, G.N[e.v0].x, G.N[e.v0].y, G.N[e.v1].x, G.N[e.v1].y);
+    var q = edgePointProjection(G,e,p);
+    if (q) {
+        return p.sub(q).length();
+    }
+    return null;
+}
+
+function edgePointProjection(G, e, p)
+{
+    var v0= G.N[e.v0];
+    var v1= G.N[e.v1];
+    var t = lineNormalProjection(p.x, p.y, v0.x, v0.y, v1.x, v1.y);
+    if (t>=0 && t<=1) {
+        return v0.add(v1.sub(v0).mul(t));
+    }
+    return null;
+}
+
+// solve t for P=x1+(x2-x1)*t AND dot((x2-x1),(P-Q))=0
+function lineNormalProjection(qx, qy, p1x, p1y, p2x, p2y)
+{
+    var PX = (p2x-p1x);
+    var PY = (p2y-p1y);
+    var D = PX*PX-PY*PY;
+    if (D>=-1e-5 && D <=1e-5)
+    {   // degenerated line
+        return null;
+    }
+    return (PX*(qx-p1x) + PY*(qy+p1y))/D;   // =t
+}
+
 function edge2txt(G, e)
 {
     return (G.N[e.v0].x + "," +G.N[e.v0].y + "-" + G.N[e.v1].x + "," + G.N[e.v1].y );
 }
+
+// splits a graph edge e at t=[0..1]
+function splitGraphEdge(G, e, p)
+{
+    var v0= G.N[e.v0];
+    var v1= G.N[e.v1];
+    G.removeEdge(v0,v1);
+    G.addEdge(v0,p);
+    G.addEdge(p,v1);
+}
+
 
 // insert an edge into the graph, calculate intersections with all other graph edges
 function insertArrangementEdge(G, v0, v1)
@@ -115,6 +171,9 @@ function insertArrangementEdge(G, v0, v1)
 module.exports = {
     getIntersection       : getIntersection,
     insertArrangementEdge : insertArrangementEdge,
-    edgeAABBIntersection  : edgeAABBIntersection
+    edgeAABBIntersection  : edgeAABBIntersection,
+    pointEdgeDist         : pointEdgeDist,
+    edgePointProjection   : edgePointProjection,
+    splitGraphEdge        : splitGraphEdge
     //edge2txt : edge2txt
 };

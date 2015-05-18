@@ -7,6 +7,18 @@ Vec2.prototype.add = function(other)
 {
     return new Vec2(this.x+other.x, this.y+other.y);
 };
+Vec2.prototype.sub = function(other)
+{
+    return new Vec2(this.x-other.x, this.y-other.y);
+};
+Vec2.prototype.mul = function(scalar)
+{
+    return new Vec2(this.x*scalar, this.y*scalar);
+};
+Vec2.prototype.length = function()
+{
+    return Math.sqrt(this.x*this.x+this.y*this.y);
+};
 Vec2.prototype.equals = function(other)
 {
     return (this.x==other.x && this.y==other.y);
