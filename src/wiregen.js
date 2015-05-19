@@ -14,6 +14,7 @@ var svgexport = require('./svgexport');
 
 // globals
 var TerminalSymbols = [];
+var EndPoints = [];
 var Symbols = [];
 var Grammar = {};
 
@@ -139,20 +140,24 @@ TerminalSymbols.forEach(function (t) {
             // shortest edge was found
             var wall = getTerminalByAttribute(TerminalSymbols, 'wall', 'id', a.wallid);
             if (wall != null)
-            if (mindist < wall.attributes.zone_width/2) {
-                // insert point on edge, TODO: add this point to output graph points!
-                // split the edge
-                var q = graph2d.edgePointProjection(G, G.E[minedge], p);
-                var v = graph2d.splitGraphEdge(G, G.E[minedge], q);
+
+            var q = graph2d.edgePointProjection(G, G.E[minedge], p);
+            var v = graph2d.splitGraphEdge(G, G.E[minedge], q);
+            if (p.sub(q).length() > wall.attributes.zone_width/2)
+            {
+                // add an additional edge, TODO:check for occluders
+                G.addEdge(p,q);
+                EndPoints.push({ pos:p, terminal:t });
             } else {
-                // insert connection to edge, TODO: insert the edge
-                var e = G.E[minedge];
-                console.log(graph2d.edge2txt(G,e));
-                console.log("TODO");
+                // inside installation zone
+                EndPoints.push({ pos:q, terminal:t });
             }
         }
     }
 });
+
+console.log("==Endpoints:");
+console.log(EndPoints);
 
 // --------------------------------------------------------------------------------------------------------------------
 
