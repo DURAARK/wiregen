@@ -1,5 +1,6 @@
 var vec = require('./vec');
 var graph = require('./graph');
+var graph2d = require('./graph-2d');
 
 // graph test
 var G = new graph.Graph();
@@ -27,4 +28,16 @@ console.log('remove v0<->v3');
 G.removeEdge(v0,v3);
 var E = G.getEdges();
 console.log(E);
+
+// projection test
+var e = new graph.Edge(v1,v2);
+var t0 = new vec.Vec2(11, 5);
+var p = graph2d.edgePointProjection(G, e, t0);
+console.log(graph2d.edge2txt(G,e) + ":" + t0 + "->" + p);
+
+var e2 = new graph.Edge(v0,v2);
+var t1 = new vec.Vec2(5, 7);
+var p2 = graph2d.edgePointProjection(G, e2, t1);
+console.log(graph2d.edge2txt(G,e2) + ":" + t1 + "->" + p2);
+
 

@@ -86,14 +86,26 @@ function edgePointProjection(G, e, p)
 // solve t for P=x1+(x2-x1)*t AND dot((x2-x1),(P-Q))=0
 function lineNormalProjection(qx, qy, p1x, p1y, p2x, p2y)
 {
-    var PX = (p2x-p1x);
-    var PY = (p2y-p1y);
-    var D = PX*PX-PY*PY;
-    if (D>=-1e-5 && D <=1e-5)
-    {   // degenerated line
+    var t2 = p2x*p1x;
+    var t5 = p1x*p1x;
+    var t7 = p2y*p1y;
+    var t8 = p1y*p1y;
+    var t10 = p2x*p2x;
+    var t12 = p2y*p2y;
+    var D=(t10-2.0*t2+t5+t12-2.0*t7+t8);
+    if (D>=-1e-5 && D <=1e-5){
         return null;
     }
-    return (PX*(qx-p1x) + PY*(qy+p1y))/D;   // =t
+    return (p2x*qx-t2+p2y*qy-p1x*qx+t5-p1y*qy-t7+t8)/D;
+
+    //var PX = (p2x-p1x);
+    //var PY = (p2y-p1y);
+    //var D = PX*PX-PY*PY;
+    //if (D>=-1e-5 && D <=1e-5)
+    //{   // degenerated line
+    //    return null;
+    //}
+    //return (PX*(qx-p1x) + PY*(qy+p1y))/D;   // =t
 }
 
 function edge2txt(G, e)
@@ -174,6 +186,6 @@ module.exports = {
     edgeAABBIntersection  : edgeAABBIntersection,
     pointEdgeDist         : pointEdgeDist,
     edgePointProjection   : edgePointProjection,
-    splitGraphEdge        : splitGraphEdge
-    //edge2txt : edge2txt
+    splitGraphEdge        : splitGraphEdge,
+    edge2txt : edge2txt
 };

@@ -107,7 +107,7 @@ TerminalSymbols.forEach(function (t)
 TerminalSymbols.forEach(function (t) {
     if (t.label=='door' || t.label=='window')
     {
-        // test if any graph edge overlaps with the window
+        // test if any graph edge overlaps with an 'obstacle'
         for (e in G.E)
         {
             if (graph2d.edgeAABBIntersection(G, G.E[e], t.attributes))
@@ -146,6 +146,9 @@ TerminalSymbols.forEach(function (t) {
                 var v = graph2d.splitGraphEdge(G, G.E[minedge], q);
             } else {
                 // insert connection to edge, TODO: insert the edge
+                var e = G.E[minedge];
+                console.log(graph2d.edge2txt(G,e));
+                console.log("TODO");
             }
         }
     }
