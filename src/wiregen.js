@@ -244,24 +244,30 @@ function findWireTree(G, root, EndPoints)
         for (epid in EP)
         {
             var ep = EP[epid];
+            console.log("Processing EndPoint: %d,%d", ep.pos.x, ep.pos.y);
             var path = getShortestPath(G, T, ep.pos);   // { edge: [], cost: <val> }
-            if (path.cost < best.path.cost) {
+            if (path.path.length > 0 && path.cost < best.path.cost) {
+                console.log(util.format("found new best path, cost: %d, old best %d, length", path.cost, best.path.cost, path.path.length));
                 best.path = path;
                 best.ep   = ep;
             }
         }
         // add path to tree, remove endpoint
-        addPath(G, T, path);
-        wgutil.removeArrObj(EP, path.ep);
-        fs.writeFileSync(util.format("wire-graph-%d.svg", ++i), svgexport.ExportGraphToSVG(T));
-        if (i>100) { return T; }
+        if (best.path.path.length > 0) {
+            addPath(G, T, best.path);
+            wgutil.removeArrObj(EP, path.ep);
+            fs.writeFileSync(util.format("wire-graph-%d.svg", ++i), svgexport.ExportGraphToSVG(T));
+            if (i > EndPoints.length) {
+                return T;
+            }
+        }
     }
     return T;
 }
 
 var WireTree = findWireTree(G, ROOT, EndPoints);
 
-console.log(WireTree);
+//console.log(WireTree);
 
 // --------------------------------------------------------------------------------------------------------------------
 
