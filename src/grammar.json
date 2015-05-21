@@ -29,5 +29,9 @@
 
   "SWITCH" : [
     { "label" : "switch" }
+  ],
+
+  "ROOT" : [
+    { "label" : "root" }
   ]
 }

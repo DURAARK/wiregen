@@ -7,10 +7,13 @@ var pkg=require( path.join(__dirname, 'package.json') );
 var program = require('commander');
 
 var vec = require('./vec');
+var wgutil = require('./wgutil');
 var grammar = require('./grammar');
 var graph = require('./graph');
 var graph2d = require('./graph-2d');
 var svgexport = require('./svgexport');
+
+var PriorityQueue = require('priorityqueuejs');
 
 // globals
 var TerminalSymbols = [];
@@ -119,9 +122,11 @@ TerminalSymbols.forEach(function (t) {
     }
 });
 
+var ROOT = null;
+
 // insert detections: insert as node if "near" to zone, connect to nearest zone otherwise
 TerminalSymbols.forEach(function (t) {
-    if (t.label=='switch' || t.label=='socket') {
+    if (t.label=='switch' || t.label=='socket' || t.label=='root') {
         var a = t.attributes;
         var p = new vec.Vec2(a.left+a.width/2, a.top+a.height/2);
         // get line with minimal normal projection distance
@@ -143,14 +148,20 @@ TerminalSymbols.forEach(function (t) {
 
             var q = graph2d.edgePointProjection(G, G.E[minedge], p);
             var v = graph2d.splitGraphEdge(G, G.E[minedge], q);
+            var endpoint;
             if (p.sub(q).length() > wall.attributes.zone_width/2)
             {
                 // add an additional edge, TODO:check for occluders
                 G.addEdge(p,q);
-                EndPoints.push({ pos:p, terminal:t });
+                endpoint = { pos:p, terminal:t };
             } else {
                 // inside installation zone
-                EndPoints.push({ pos:q, terminal:t });
+                endpoint = { pos:q, terminal:t };
+            }
+            EndPoints.push(endpoint);
+            if (t.label == 'root')
+            {
+                ROOT = endpoint;
             }
         }
     }
@@ -158,6 +169,99 @@ TerminalSymbols.forEach(function (t) {
 
 console.log("==Endpoints:");
 console.log(EndPoints);
+//console.log("==Terminals:");
+//console.log(TerminalSymbols);
+
+// get shortest path in graph G from vertex v to any vertex in T
+function getShortestPath(G, T, v)
+{
+    // do a BFS
+    var visited = {};
+    var Q = new PriorityQueue(function(a,b) { return b.cost - a.cost; });
+
+    Q.enq({v:v, cost:0, path:[]});
+    visited[v._id]=true;
+
+    while(Q.size() > 0)
+    {
+        var node = Q.deq();
+        if (node.v._id in T.N)
+        {
+            // finished
+            return node;
+        }
+        if (!G.N[node.v._id])
+        {
+            console.log("brak.");
+        }
+        var adjacent = G.N[node.v._id].adjacent;
+        for (var adj in adjacent)
+        {
+            if (!(adj in visited))
+            {
+                visited[adj]=true;
+                var e = new graph.Edge(node.v, G.N[adj]);
+                var next = {
+                    v: G.N[adj],
+                    cost: node.cost,
+                    path: node.path.slice()
+                };
+                next.cost += graph2d.edgeLength(G,e);
+                next.path.push(e);
+                Q.enq(next);
+            }
+        }
+    }
+    return null;
+}
+
+// add vertices in path to T
+function addPath(G, T, path)
+{
+    for (eid in path.path)
+    {
+        var e = path.path[eid];
+        T.addEdge(G.N[e.v0], G.N[e.v1]);
+    }
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// WIRE HYPOTHESIS
+// extract tree from graph:
+function findWireTree(G, root, EndPoints)
+{
+    var EP = EndPoints.slice();
+    var T = new graph.Graph();
+// - insert root in tree
+    var v = G.isGraphVertex(root.pos);
+    T.N[v._id]=v;
+    wgutil.removeArrObj(EP, root);
+    var i =0;
+    // - find shortest path from current endpoint to tree, for all endpoints
+    while(EP.length > 0)
+    {
+        var best = { path:{cost: Number.MAX_VALUE }, ep: null };
+        for (epid in EP)
+        {
+            var ep = EP[epid];
+            var path = getShortestPath(G, T, ep.pos);   // { edge: [], cost: <val> }
+            if (path.cost < best.path.cost) {
+                best.path = path;
+                best.ep   = ep;
+            }
+        }
+        // add path to tree, remove endpoint
+        addPath(G, T, path);
+        wgutil.removeArrObj(EP, path.ep);
+        fs.writeFileSync(util.format("wire-graph-%d.svg", ++i), svgexport.ExportGraphToSVG(T));
+        if (i>100) { return T; }
+    }
+    return T;
+}
+
+var WireTree = findWireTree(G, ROOT, EndPoints);
+
+console.log(WireTree);
 
 // --------------------------------------------------------------------------------------------------------------------
 

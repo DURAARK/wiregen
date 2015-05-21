@@ -1,11 +1,8 @@
 // Graph 2D Utils
 var vec  =require('./vec');
 var graph=require('./graph');
+var util=require('./wgutil');
 
-function removeArrObj(array, object) {
-    var index = array.indexOf(object);
-    if (index > -1) { array.splice(index, 1); }
-}
 
 // test two graph edges for intersection
 function edgeIntersection(G, e0, e1)
@@ -118,9 +115,12 @@ function splitGraphEdge(G, e, p)
 {
     var v0= G.N[e.v0];
     var v1= G.N[e.v1];
-    G.removeEdge(v0,v1);
-    G.addEdge(v0,p);
-    G.addEdge(p,v1);
+    if (!(p.equals(v0) || p.equals(v1)))
+    {
+        G.removeEdge(v0,v1);
+        G.addEdge(v0,p);
+        G.addEdge(p,v1);
+    }
 }
 
 
@@ -160,7 +160,7 @@ function insertArrangementEdge(G, v0, v1)
                     // add new edges in graph
                     G.addEdge(G.N[ge.v0],p);
                     G.addEdge(p, G.N[ge.v1]);
-                    removeArrObj(splitEdges, se.toString());
+                    util.removeArrObj(splitEdges, se.toString());
                     splitEdges.push(new graph.Edge(G.N[se.v0], p).toString());
                     splitEdges.push(new graph.Edge(p, G.N[se.v1]).toString());
                     break;
@@ -180,6 +180,14 @@ function insertArrangementEdge(G, v0, v1)
     }
 }
 
+function edgeLength(G, e)
+{
+    var v0 = G.N[G.E[e].v0];
+    var v1 = G.N[G.E[e].v1];
+    return v1.sub(v0).length();
+}
+
+
 module.exports = {
     getIntersection       : getIntersection,
     insertArrangementEdge : insertArrangementEdge,
@@ -187,5 +195,6 @@ module.exports = {
     pointEdgeDist         : pointEdgeDist,
     edgePointProjection   : edgePointProjection,
     splitGraphEdge        : splitGraphEdge,
-    edge2txt : edge2txt
+    edge2txt : edge2txt,
+    edgeLength: edgeLength
 };

@@ -76,5 +76,15 @@
       "weight:" : 0.8,
       "wallid" : "wall01_1_01"
     }
+  },
+  {
+    "label": "ROOT",
+    "attributes": {
+      "left" : 150,
+      "top" : 300,
+      "width" : 0,
+      "height" : 0,
+      "wallid" : "wall01_1_01"
+    }
   }
 ]

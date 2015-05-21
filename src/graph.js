@@ -44,15 +44,23 @@ Graph.prototype.newNodeID = function()
     return id.toString();
 };
 
-Graph.prototype.checkVertex = function(v)
+Graph.prototype.isGraphVertex = function(v)
 {
-    // see if this vertex is already in the node list
     for (n in this.N) {
         if (this.N[n].equals(v)) {
             return this.N[n];
         }
     }
-    if (!('_id' in v)) v['_id'] = this.newNodeID();
+    return null;
+}
+
+Graph.prototype.checkVertex = function(v)
+{
+    // see if this vertex is already in the node list
+    n=this.isGraphVertex(v);
+    if (n != null){ return n; }
+    // insert into graph
+    v['_id'] = this.newNodeID();
     this.N[v._id] = v;
     return v;
 };
@@ -121,37 +129,6 @@ Graph.prototype.getEdges = function()
         result.push(this.E[key]);
     return result;
 };
-
-//Graph.prototype.getEdges = function()
-//{
-//    var edges = [];
-//
-//    edgeVisitor = function(node)
-//    {
-//        for(var a in node.adjacent)
-//        {
-//            var newEdge = true;
-//            var edge = { v0: node._id, v1: a };
-//            for (var eid in edges)
-//            {
-//                var e = edges[eid];
-//                if (  (edge.v0==e.v0 && edge.v1==e.v1)
-//                   || (edge.v0==e.v1 && edge.v1==e.v0) )
-//                {
-//                    newEdge=false;
-//                    break;
-//                }
-//            }
-//            if (newEdge) {
-//                edges.push( edge );
-//            }
-//        }
-//    };
-//
-//    this.DFS(edgeVisitor);
-//
-//    return edges;
-//};
 
 module.exports =
 {
