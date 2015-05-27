@@ -40,7 +40,7 @@ program
 // read installation zone grammar
 console.log('reading installation zone grammar from %s', program.grammar);
 Grammar = readJSON(program.grammar);
-console.log('parsed %d grammar rules', Object.keys(grammar).length);
+console.log('parsed %d grammar rules', Object.keys(Grammar).length);
 
 // read semantic entities (input symbols)
 console.log('* reading semantic entities from %s', program.input);
