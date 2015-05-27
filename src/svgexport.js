@@ -1,3 +1,6 @@
+// export installation zone grammar terminals and 2d graphs to SVG
+//
+// ulrich.krispel@vc.fraunhofer.at
 
 var util = require('util');
 var vec = require('./vec');

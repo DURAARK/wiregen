@@ -1,3 +1,6 @@
+// simple attributed symbol grammar
+//
+// ulrich.krispel@vc.fraunhofer.at
 
 // -----------------------------------------------------
 // Terminals are lowercase

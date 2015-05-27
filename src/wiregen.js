@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-
+// WireGen - electrical appliance hypothesis
+// 
+// ulrich.krispel@vc.fraunhofer.at
+//
 var fs=require('fs')
 var path=require('path')
 var util = require('util');

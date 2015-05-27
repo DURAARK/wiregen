@@ -1,5 +1,7 @@
-// a simple undirected graph structure
-// graph can store vertices of any kind and
+// A simple graph structure with undirected edges
+// 
+// ulrich.krispel@vc.fraunhofer.at
+//
 var util = require('util');
 
 function isEmpty(obj) {

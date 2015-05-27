@@ -1,3 +1,7 @@
+// small graph unit tests
+//
+// ulrich.krispel@vc.fraunhofer.at
+
 var vec = require('./vec');
 var graph = require('./graph');
 var graph2d = require('./graph-2d');

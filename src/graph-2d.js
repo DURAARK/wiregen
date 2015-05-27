@@ -1,10 +1,14 @@
 // Graph 2D Utils
+// 
+// ulrich.krispel@vc.fraunhofer.at
+//
+
 var vec  =require('./vec');
 var graph=require('./graph');
 var util=require('./wgutil');
 
 
-// test two graph edges for intersection
+// test two graph edges for intersection (returns intersection point)
 function edgeIntersection(G, e0, e1)
 {
     var v0x = G.N[e0.v0].x, v0y=G.N[e0.v0].y,
@@ -14,6 +18,7 @@ function edgeIntersection(G, e0, e1)
     return getIntersection(v0x,v0y,v1x,v1y,v2x,v2y,v3x,v3y);
 }
 
+// returns intersection of an graph edge with an AABB
 function edgeAABBIntersection(G, e, rect)
 {
     // get edge coordinates
@@ -48,9 +53,9 @@ function getIntersection(v0x,v0y,v1x,v1y,v2x,v2y,v3x,v3y)
     return null;
 };
 
+// orthogonal distance of point <-> edge
 function pointEdgeDist(G, e, p)
 {
-    //return pointLineDistance(p.x, p.y, G.N[e.v0].x, G.N[e.v0].y, G.N[e.v1].x, G.N[e.v1].y);
     var q = edgePointProjection(G,e,p);
     if (q) {
         return p.sub(q).length();
@@ -58,6 +63,7 @@ function pointEdgeDist(G, e, p)
     return null;
 }
 
+// orthogonal projection of point onto graph edge
 function edgePointProjection(G, e, p)
 {
     var v0= G.N[e.v0];
@@ -69,6 +75,7 @@ function edgePointProjection(G, e, p)
     return null;
 }
 
+// orthogonal projection of point Q onto line segment x1-x2
 // solve t for P=x1+(x2-x1)*t AND dot((x2-x1),(P-Q))=0
 function lineNormalProjection(qx, qy, p1x, p1y, p2x, p2y)
 {
@@ -85,6 +92,7 @@ function lineNormalProjection(qx, qy, p1x, p1y, p2x, p2y)
     return (p2x*qx-t2+p2y*qy-p1x*qx+t5-p1y*qy-t7+t8)/D;
 }
 
+// just simple conversion of edge points to 
 function edge2txt(G, e)
 {
     return (G.N[e.v0].x + "," +G.N[e.v0].y + "-" + G.N[e.v1].x + "," + G.N[e.v1].y );
@@ -104,7 +112,8 @@ function splitGraphEdge(G, e, p)
 }
 
 
-// insert an edge into the graph, calculate intersections with all other graph edges
+// insert the line segment v0-v1 into the graph, 
+// calculate intersections with all other graph edges
 function insertArrangementEdge(G, v0, v1)
 {
     v0 = G.checkVertex(v0);
