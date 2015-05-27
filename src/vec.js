@@ -21,6 +21,9 @@ Vec2.prototype.length = function()
 };
 Vec2.prototype.equals = function(other)
 {
+    if (!other) {
+        console.log("BRAK.");
+    }
     return (this.x==other.x && this.y==other.y);
 };
 Vec2.prototype.toString = function()

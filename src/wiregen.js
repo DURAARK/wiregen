@@ -167,8 +167,8 @@ TerminalSymbols.forEach(function (t) {
     }
 });
 
-console.log("==Endpoints:");
-console.log(EndPoints);
+//console.log("==Endpoints:");
+//console.log(EndPoints);
 //console.log("==Terminals:");
 //console.log(TerminalSymbols);
 
@@ -185,29 +185,32 @@ function getShortestPath(G, T, v)
     while(Q.size() > 0)
     {
         var node = Q.deq();
+        //console.log("pop queue node: " + node.v._id);
         if (node.v._id in T.N)
         {
             // finished
             return node;
         }
-        if (!G.N[node.v._id])
+        var adjacent = G.getAdjacency(node.v);
         {
-            console.log("brak.");
+            var adjstr = "";
+            for (var x in adjacent) { adjstr += x + " "; }
+            //console.log("adjacent: " + adjstr);
         }
-        var adjacent = G.N[node.v._id].adjacent;
-        for (var adj in adjacent)
-        {
-            if (!(adj in visited))
-            {
-                visited[adj]=true;
-                var e = new graph.Edge(node.v, G.N[adj]);
+        for (var a in adjacent) {
+            var adj_v = adjacent[a];
+            if (!(a in visited)) {
+                visited[a] = true;
+                var newedge = new graph.Edge(node.v, adj_v);
                 var next = {
-                    v: G.N[adj],
+                    v: adj_v,
                     cost: node.cost,
                     path: node.path.slice()
                 };
-                next.cost += graph2d.edgeLength(G,e);
-                next.path.push(e);
+                //console.log("newedge = " + newedge + " node.v:" + node.v._id + " adj:" + a);
+                next.cost += graph2d.edgeLength(G, newedge);
+                //console.log("adding edge:" + newedge)
+                next.path.push(newedge);
                 Q.enq(next);
             }
         }
@@ -218,10 +221,12 @@ function getShortestPath(G, T, v)
 // add vertices in path to T
 function addPath(G, T, path)
 {
-    for (eid in path.path)
-    {
-        var e = path.path[eid];
-        T.addEdge(G.N[e.v0], G.N[e.v1]);
+    //console.log("= add path to T:");
+    for (var eid in path.path) {
+        var e = G.E[path.path[eid]];
+        var ev0 = G.N[e.v0];
+        var ev1 = G.N[e.v1];
+        T.addEdge(ev0, ev1);
     }
 }
 
@@ -241,13 +246,13 @@ function findWireTree(G, root, EndPoints)
     while(EP.length > 0)
     {
         var best = { path:{cost: Number.MAX_VALUE }, ep: null };
-        for (epid in EP)
+        for (var epid in EP)
         {
             var ep = EP[epid];
-            console.log("Processing EndPoint: %d,%d", ep.pos.x, ep.pos.y);
+            //console.log("Processing EndPoint: %d,%d", ep.pos.x, ep.pos.y);
             var path = getShortestPath(G, T, ep.pos);   // { edge: [], cost: <val> }
             if (path.path.length > 0 && path.cost < best.path.cost) {
-                console.log(util.format("found new best path, cost: %d, old best %d, length", path.cost, best.path.cost, path.path.length));
+                //console.log(util.format("found new best path, cost: %d, old best %d, length", path.cost, best.path.cost, path.path.length));
                 best.path = path;
                 best.ep   = ep;
             }
@@ -255,8 +260,8 @@ function findWireTree(G, root, EndPoints)
         // add path to tree, remove endpoint
         if (best.path.path.length > 0) {
             addPath(G, T, best.path);
-            wgutil.removeArrObj(EP, path.ep);
-            fs.writeFileSync(util.format("wire-graph-%d.svg", ++i), svgexport.ExportGraphToSVG(T));
+            wgutil.removeArrObj(EP, best.ep);
+            //fs.writeFileSync(util.format("wire-graph-%d.svg", ++i), svgexport.ExportGraphToSVG(T));
             if (i > EndPoints.length) {
                 return T;
             }
@@ -266,10 +271,11 @@ function findWireTree(G, root, EndPoints)
 }
 
 var WireTree = findWireTree(G, ROOT, EndPoints);
-
 //console.log(WireTree);
 
 // --------------------------------------------------------------------------------------------------------------------
 
 fs.writeFileSync("terminals.svg", svgexport.ExportTerminalsToSVG(TerminalSymbols));
 fs.writeFileSync("graph.svg", svgexport.ExportGraphToSVG(G));
+fs.writeFileSync("wire-graph.svg", svgexport.ExportGraphToSVG(WireTree));
+

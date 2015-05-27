@@ -48,17 +48,6 @@ function getIntersection(v0x,v0y,v1x,v1y,v2x,v2y,v3x,v3y)
     return null;
 };
 
-// point - line distance
-// point (x0,y0) -> line (x1,y1)-(x2,y2)
-//function pointLineDistance(x0,y0,x1,y1,x2,y2) {
-    //var D = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)+(y2-y1));
-    //if (D>=-1e-5 && D <=1e-5)
-    //{   // degenerated line
-    //    return null;
-    //}
-    //return Math.abs((x2-x1)*(y1-y0)-(x1-x0)*(y2-y1)) / D;
-//}
-
 function pointEdgeDist(G, e, p)
 {
     //return pointLineDistance(p.x, p.y, G.N[e.v0].x, G.N[e.v0].y, G.N[e.v1].x, G.N[e.v1].y);
@@ -94,15 +83,6 @@ function lineNormalProjection(qx, qy, p1x, p1y, p2x, p2y)
         return null;
     }
     return (p2x*qx-t2+p2y*qy-p1x*qx+t5-p1y*qy-t7+t8)/D;
-
-    //var PX = (p2x-p1x);
-    //var PY = (p2y-p1y);
-    //var D = PX*PX-PY*PY;
-    //if (D>=-1e-5 && D <=1e-5)
-    //{   // degenerated line
-    //    return null;
-    //}
-    //return (PX*(qx-p1x) + PY*(qy+p1y))/D;   // =t
 }
 
 function edge2txt(G, e)
@@ -182,6 +162,9 @@ function insertArrangementEdge(G, v0, v1)
 
 function edgeLength(G, e)
 {
+    if (!(G.E[e])) {
+        console.log("[edgeLength]: graph does not contain edge.");
+    }
     var v0 = G.N[G.E[e].v0];
     var v1 = G.N[G.E[e].v1];
     return v1.sub(v0).length();
@@ -195,6 +178,6 @@ module.exports = {
     pointEdgeDist         : pointEdgeDist,
     edgePointProjection   : edgePointProjection,
     splitGraphEdge        : splitGraphEdge,
-    edge2txt : edge2txt,
-    edgeLength: edgeLength
+    edge2txt              : edge2txt,
+    edgeLength            : edgeLength
 };
