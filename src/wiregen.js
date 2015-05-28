@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+"use strict";
 // WireGen - electrical appliance hypothesis
 // 
 // ulrich.krispel@vc.fraunhofer.at
@@ -15,8 +16,6 @@ var grammar = require('./grammar');
 var graph = require('./graph');
 var graph2d = require('./graph-2d');
 var svgexport = require('./svgexport');
-
-var PriorityQueue = require('priorityqueuejs');
 
 // globals
 var TerminalSymbols = [];
@@ -115,7 +114,7 @@ TerminalSymbols.forEach(function (t) {
     if (t.label=='door' || t.label=='window')
     {
         // test if any graph edge overlaps with an 'obstacle'
-        for (e in G.E)
+        for (var e in G.E)
         {
             if (graph2d.edgeAABBIntersection(G, G.E[e], t.attributes))
             {
@@ -135,7 +134,7 @@ TerminalSymbols.forEach(function (t) {
         // get line with minimal normal projection distance
         var mindist=Number.MAX_VALUE;
         var minedge=null;
-        for (e in G.E) {
+        for (var e in G.E) {
             var dist = graph2d.pointEdgeDist(G, G.E[e], p);
             if (dist != null) {
                 if (dist < mindist) {
@@ -175,63 +174,6 @@ TerminalSymbols.forEach(function (t) {
 //console.log("==Terminals:");
 //console.log(TerminalSymbols);
 
-// get shortest path in graph G from vertex v to any vertex in T
-function getShortestPath(G, T, v)
-{
-    // do a BFS
-    var visited = {};
-    var Q = new PriorityQueue(function(a,b) { return b.cost - a.cost; });
-
-    Q.enq({v:v, cost:0, path:[]});
-    visited[v._id]=true;
-
-    while(Q.size() > 0)
-    {
-        var node = Q.deq();
-        //console.log("pop queue node: " + node.v._id);
-        if (node.v._id in T.N)
-        {
-            // finished
-            return node;
-        }
-        var adjacent = G.getAdjacency(node.v);
-        {
-            var adjstr = "";
-            for (var x in adjacent) { adjstr += x + " "; }
-            //console.log("adjacent: " + adjstr);
-        }
-        for (var a in adjacent) {
-            var adj_v = adjacent[a];
-            if (!(a in visited)) {
-                visited[a] = true;
-                var newedge = new graph.Edge(node.v, adj_v);
-                var next = {
-                    v: adj_v,
-                    cost: node.cost,
-                    path: node.path.slice()
-                };
-                //console.log("newedge = " + newedge + " node.v:" + node.v._id + " adj:" + a);
-                next.cost += graph2d.edgeLength(G, newedge);
-                //console.log("adding edge:" + newedge)
-                next.path.push(newedge);
-                Q.enq(next);
-            }
-        }
-    }
-    return null;
-}
-
-// add vertices in path to T
-function addPath(G, T, path)
-{
-    //console.log("= add path to T:");
-    for (var eid in path.path) {
-        var e = G.E[path.path[eid]];
-        var ev0 = G.N[e.v0];
-        var ev1 = G.N[e.v1];
-        T.addEdge(ev0, ev1);
-    }
-}
 
 // --------------------------------------------------------------------------------------------------------------------
 // WIRE HYPOTHESIS
@@ -253,7 +195,7 @@ function findWireTree(G, root, EndPoints)
         {
             var ep = EP[epid];
             //console.log("Processing EndPoint: %d,%d", ep.pos.x, ep.pos.y);
-            var path = getShortestPath(G, T, ep.pos);   // { edge: [], cost: <val> }
+            var path = graph2d.getShortestPath(G, T, ep.pos);   // { edge: [], cost: <val> }
             if (path.path.length > 0 && path.cost < best.path.cost) {
                 //console.log(util.format("found new best path, cost: %d, old best %d, length", path.cost, best.path.cost, path.path.length));
                 best.path = path;
@@ -262,7 +204,7 @@ function findWireTree(G, root, EndPoints)
         }
         // add path to tree, remove endpoint
         if (best.path.path.length > 0) {
-            addPath(G, T, best.path);
+            T.addPathFromGraph(G, best.path.path);
             wgutil.removeArrObj(EP, best.ep);
             //fs.writeFileSync(util.format("wire-graph-%d.svg", ++i), svgexport.ExportGraphToSVG(T));
             if (i > EndPoints.length) {

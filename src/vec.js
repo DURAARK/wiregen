@@ -1,3 +1,4 @@
+"use strict";
 // simple 2d vector and axis aligned bounding boxes (AABB)
 // ulrich.krispel@vc.fraunhofer.at
 

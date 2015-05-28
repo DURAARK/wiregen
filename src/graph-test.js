@@ -1,3 +1,4 @@
+"use strict";
 // small graph unit tests
 //
 // ulrich.krispel@vc.fraunhofer.at

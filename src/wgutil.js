@@ -1,3 +1,4 @@
+"use strict";
 // wiregen utils
 // ulrich.krispel@vc.fraunhofer.at
 

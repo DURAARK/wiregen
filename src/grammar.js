@@ -1,3 +1,4 @@
+"use strict";
 // simple attributed symbol grammar
 //
 // ulrich.krispel@vc.fraunhofer.at
@@ -12,7 +13,7 @@ function isTerminal(S)
 function evaluateGrammarStep(NT, T, G)
 {
     var result = [];
-    GrammarEvaluated = true;
+    var GrammarEvaluated = true;
     NT.forEach(function (lhs)
         {
             // Convention: parent attributes are accessible via "att."

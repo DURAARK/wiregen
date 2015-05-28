@@ -1,3 +1,4 @@
+"use strict";
 // A simple graph structure with undirected edges
 // 
 // ulrich.krispel@vc.fraunhofer.at
@@ -51,6 +52,7 @@ function Graph()
 }
 Graph.prototype.newNodeID = function()
 {
+    var id;
     do {
         id = this.nodeid++;
     } while(id in this.N);
@@ -68,7 +70,7 @@ Graph.prototype.isGraphVertex = function(v)
         }
     }
     // iterate over nodes and test against v,
-    for (n in this.N) {
+    for (var n in this.N) {
         if (this.N[n].equals(v)) {
             return this.N[n];
         }
@@ -79,7 +81,7 @@ Graph.prototype.isGraphVertex = function(v)
 Graph.prototype.checkVertex = function(v)
 {
     // see if this vertex is already in the node list
-    n=this.isGraphVertex(v);
+    var n=this.isGraphVertex(v);
     if (n != null){ return n; }
     if (!v.hasOwnProperty('_id')) { // reuse ids
         v['_id'] = this.newNodeID();
@@ -91,6 +93,7 @@ Graph.prototype.checkVertex = function(v)
 
 Graph.prototype.addAdjacency = function(v0, v1)
 {
+    var v0id, v1id;
     if (v0.hasOwnProperty('_id'))
         v0id = v0._id;
     else v0id = v0;
@@ -169,6 +172,17 @@ Graph.prototype.getEdges = function()
         result.push(this.E[key]);
     return result;
 };
+
+
+// add path in G to this graph (retains ids)
+Graph.prototype.addPathFromGraph = function addPath(G, path) {
+    for (var eid in path) {
+        var e = G.E[path[eid]];
+        var ev0 = G.N[e.v0];
+        var ev1 = G.N[e.v1];
+        this.addEdge(ev0, ev1);
+    }
+}
 
 Graph.prototype.checkIntegrity = function () {
     // every vertex has to have a valid id

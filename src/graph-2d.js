@@ -1,12 +1,14 @@
+"use strict";
 // Graph 2D Utils
 // 
 // ulrich.krispel@vc.fraunhofer.at
 //
 
-var vec  =require('./vec');
-var graph=require('./graph');
-var util=require('./wgutil');
+var vec = require('./vec');
+var graph = require('./graph');
+var util = require('./wgutil');
 
+var PriorityQueue = require('priorityqueuejs');
 
 // test two graph edges for intersection (returns intersection point)
 function edgeIntersection(G, e0, e1)
@@ -134,7 +136,7 @@ function insertArrangementEdge(G, v0, v1)
         for (var e in G.E)
         {
             var ge = new graph.Edge(e);
-            for (seid in splitEdges)
+            for (var seid in splitEdges)
             {
                 var se = new graph.Edge(splitEdges[seid]);
                 var p = edgeIntersection(G, ge, se);
@@ -180,6 +182,50 @@ function edgeLength(G, e)
 }
 
 
+// get shortest path in graph G from vertex v to any vertex in graph T
+function getShortestPath(G, T, v) {
+    // do a BFS
+    var visited = {};
+    var Q = new PriorityQueue(function (a, b) { return b.cost - a.cost; });
+    
+    Q.enq({ v: v, cost: 0, path: [] });
+    visited[v._id] = true;
+    
+    while (Q.size() > 0) {
+        var node = Q.deq();
+        //console.log("pop queue node: " + node.v._id);
+        if (node.v._id in T.N) {
+            // finished
+            return node;
+        }
+        var adjacent = G.getAdjacency(node.v);
+        {
+            var adjstr = "";
+            for (var x in adjacent) { adjstr += x + " "; }
+            //console.log("adjacent: " + adjstr);
+        }
+        for (var a in adjacent) {
+            var adj_v = adjacent[a];
+            if (!(a in visited)) {
+                visited[a] = true;
+                var newedge = new graph.Edge(node.v, adj_v);
+                var next = {
+                    v: adj_v,
+                    cost: node.cost,
+                    path: node.path.slice()
+                };
+                //console.log("newedge = " + newedge + " node.v:" + node.v._id + " adj:" + a);
+                next.cost += edgeLength(G, newedge);
+                //console.log("adding edge:" + newedge)
+                next.path.push(newedge);
+                Q.enq(next);
+            }
+        }
+    }
+    return null;
+}
+
+
 module.exports = {
     getIntersection       : getIntersection,
     insertArrangementEdge : insertArrangementEdge,
@@ -188,5 +234,6 @@ module.exports = {
     edgePointProjection   : edgePointProjection,
     splitGraphEdge        : splitGraphEdge,
     edge2txt              : edge2txt,
-    edgeLength            : edgeLength
+    edgeLength            : edgeLength,
+    getShortestPath       : getShortestPath
 };
