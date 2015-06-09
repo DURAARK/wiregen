@@ -4,44 +4,44 @@
 
 function Vec2(x, y)
 {
-    this.x = typeof x !== 'undefined' ? x : 0;
-    this.y = typeof y !== 'undefined' ? y : 0;
+    this.x = x !== undefined ? x : 0;
+    this.y = y !== undefined ? y : 0;
 }
 Vec2.prototype.add = function(other)
 {
-    return new Vec2(this.x+other.x, this.y+other.y);
+    return new Vec2(this.x + other.x, this.y + other.y);
 };
 Vec2.prototype.sub = function(other)
 {
-    return new Vec2(this.x-other.x, this.y-other.y);
+    return new Vec2(this.x - other.x, this.y - other.y);
 };
 Vec2.prototype.mul = function(scalar)
 {
-    return new Vec2(this.x*scalar, this.y*scalar);
+    return new Vec2(this.x * scalar, this.y * scalar);
 };
 Vec2.prototype.length = function()
 {
-    return Math.sqrt(this.x*this.x+this.y*this.y);
+    return Math.sqrt(this.x * this.x + this.y * this.y);
 };
 Vec2.prototype.equals = function(other)
 {
-    return (this.x==other.x && this.y==other.y);
+    return (this.x == other.x && this.y == other.y);
 };
 
 function AABB(bbmin, bbmax)
 {
-    this.bbmin = typeof bbmin !== 'undefined' ? bbmin : new Vec2(Number.MAX_VALUE,Number.MAX_VALUE);
-    this.bbmax = typeof bbmax !== 'undefined' ? bbmax : new Vec2(Number.MIN_VALUE,Number.MIN_VALUE);
+    this.bbmin = bbmin !== undefined ? bbmin : new Vec2(Number.MAX_VALUE,Number.MAX_VALUE);
+    this.bbmax = bbmax !== undefined ? bbmax : new Vec2(Number.MIN_VALUE,Number.MIN_VALUE);
 }
 AABB.prototype.insert = function(x,y)
 {
-    if (x<this.bbmin.x) this.bbmin.x=x;
-    if (x>this.bbmax.x) this.bbmax.x=x;
-    if (y<this.bbmin.y) this.bbmin.y=y;
-    if (y>this.bbmax.y) this.bbmax.y=y;
+    if (x < this.bbmin.x) this.bbmin.x = x;
+    if (x > this.bbmax.x) this.bbmax.x = x;
+    if (y < this.bbmin.y) this.bbmin.y = y;
+    if (y > this.bbmax.y) this.bbmax.y = y;
 };
-AABB.prototype.width  = function() { return this.bbmax.x-this.bbmin.x; };
-AABB.prototype.height = function() { return this.bbmax.y-this.bbmin.y; };
+AABB.prototype.width  = function() { return this.bbmax.x - this.bbmin.x; };
+AABB.prototype.height = function() { return this.bbmax.y - this.bbmin.y; };
 
 module.exports = {
     Vec2 : Vec2,

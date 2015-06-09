@@ -14,7 +14,7 @@
     },
     "left": 1,
     "right": 2,
-    "orthogonal": [ ]
+    "crosslink": [ ]
   },
   {
     "label": "WALL",
@@ -28,9 +28,9 @@
       "x" : [ 0, -1, 0],
       "y" : [ 0, 0, -1]
     },
-    "left": 1,
-    "right": 2,
-    "orthogonal": [ ]
+    "left": 2,
+    "right": 3,
+    "crosslink": [ ]
   },
   {
     "label": "DOOR",
@@ -97,14 +97,69 @@
       "wallid" : "WALL-A"
     }
   },
-  {
-    "label": "ROOT",
+    {
+        "label": "ROOT",
+        "attributes": {
+            "left": 150,
+            "top": 300,
+            "width": 0,
+            "height": 0,
+            "wallid": "WALL-A"
+        }
+    },
+      {
+    "label": "SOCKET",
     "attributes": {
-      "left" : 150,
-      "top" : 300,
-      "width" : 0,
-      "height" : 0,
-      "wallid" : "WALL-A"
+      "left" : 300,
+      "top" : 2036,
+      "width" : 128,
+      "height" : 128,
+      "weight:" : 0.8,
+      "wallid" : "WALL-B"
+    }
+  },
+      {
+    "label": "SOCKET",
+    "attributes": {
+      "left" : 450,
+      "top" : 2036,
+      "width" : 128,
+      "height" : 128,
+      "weight:" : 0.8,
+      "wallid" : "WALL-B"
+    }
+  },
+      {
+    "label": "SOCKET",
+    "attributes": {
+      "left" : 2350,
+      "top" : 2036,
+      "width" : 128,
+      "height" : 128,
+      "weight:" : 0.8,
+      "wallid" : "WALL-B"
+    }
+  },
+      {
+    "label": "SOCKET",
+    "attributes": {
+      "left" : 2500,
+      "top" : 2036,
+      "width" : 128,
+      "height" : 128,
+      "weight:" : 0.8,
+      "wallid" : "WALL-B"
+    }
+  },
+  {
+    "label": "WINDOW",
+    "attributes": {
+      "left" : 700,
+      "top" : 415,
+      "width" : 735,
+      "height" : 800,
+      "wallid" : "WALL-B"
     }
   }
+
 ]

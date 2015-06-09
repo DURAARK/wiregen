@@ -6,50 +6,78 @@
 var util = require('util');
 var vec = require('./vec');
 
-// returns svg string
+// returns an object with one svg string per wall
 function ExportTerminalsToSVG(symbols)
 {
     var s = 0.1;    // scale
+    
+    var result = {};
+    var resultbb = {};
+    var WALLS = [];
 
-    // get bounding box
-    var bb = new vec.AABB();
+    // get bounding box per wall
     symbols.forEach(function (symbol)
     {
         var att = symbol.attributes;
-        bb.insert(att.left,att.top);
-        bb.insert(att.left+att.width,att.top+att.height);
+        if (att.hasOwnProperty('wallid')) {
+            if (!resultbb.hasOwnProperty(att.wallid)) {
+                resultbb[att.wallid] = new vec.AABB();
+            }
+            resultbb[att.wallid].insert(att.left, att.top);
+            resultbb[att.wallid].insert(att.left + att.width, att.top + att.height);            
+        }
+        if (symbol.label == "wall") {
+            WALLS.push(symbol);
+            if (!resultbb.hasOwnProperty(att.id)) {
+                resultbb[att.id] = new vec.AABB();
+            }
+            resultbb[att.id].insert(att.left, att.top);
+            resultbb[att.id].insert(att.left + att.width, att.top + att.height);
+        }
+    });
+    
+    // initialize wall svgs
+    WALLS.forEach(function (symbol) {
+        var att = symbol.attributes;
+        result[att.id] = util.format('<svg width="%s" height="%s" version="1.1" xmlns="http://www.w3.org/2000/svg">\n', resultbb[att.id].width() * s, resultbb[att.id].height() * s);
+        result[att.id] += util.format('<rect width="%d" height="%d" style="fill:rgb(240,240,240);stroke-width:3;stroke:rgb(0,0,0)" />\n', resultbb[att.id].width() * s, resultbb[att.id].height() * s);
     });
 
-    var result = util.format('<svg width="%s" height="%s" version="1.1" xmlns="http://www.w3.org/2000/svg">\n', bb.width()*s, bb.height()*s);
-
+    //var result = util.format('<svg width="%s" height="%s" version="1.1" xmlns="http://www.w3.org/2000/svg">\n', bb.width()*s, bb.height()*s);
     // draw bounding box
-    result += util.format('<rect width="%d" height="%d" style="fill:rgb(240,240,240);stroke-width:3;stroke:rgb(0,0,0)" />\n', bb.width()*s, bb.height()*s);
+    //result += util.format('<rect width="%d" height="%d" style="fill:rgb(240,240,240);stroke-width:3;stroke:rgb(0,0,0)" />\n', bb.width()*s, bb.height()*s);
 
     symbols.forEach(function (symbol)
     {
         var att = symbol.attributes;
-
-        switch(symbol.label)
-        {
-            case "hzone":
-                result += util.format('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke-dasharray="10,10" style="stroke:rgb(255,0,0);stroke-width:2;" />\n', 0, att.pos*s, bb.width()*s, att.pos*s);
-                break;
-            case "vzone":
-                result += util.format('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke-dasharray="10,10" style="stroke:rgb(255,0,0);stroke-width:2;" />\n', att.pos*s, 0, att.pos*s, bb.height()*s);
-                break;
-            case "door":
-                result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:rgb(200,200,100);stroke-width:3;stroke:rgb(0,0,0)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
-                break;
-            case "socket":
-                result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,200,0)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
-                break;
-            case "switch":
-                result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,0,200)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
-                break;
+        if (att.hasOwnProperty('wallid')) {
+            var bb = resultbb[att.wallid];
+            console.log("looking at symbol " + symbol.label);
+            switch(symbol.label)
+            {
+                case "hzone":
+                    result[att.wallid] += util.format('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke-dasharray="10,10" style="stroke:rgb(255,0,0);stroke-width:2;" />\n', 0, att.pos*s, bb.width()*s, att.pos*s);
+                    break;
+                case "vzone":
+                    result[att.wallid] += util.format('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke-dasharray="10,10" style="stroke:rgb(255,0,0);stroke-width:2;" />\n', att.pos*s, 0, att.pos*s, bb.height()*s);
+                    break;
+                case "door": case "window":
+                    result[att.wallid] += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:rgb(200,200,100);stroke-width:3;stroke:rgb(0,0,0)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
+                    break;
+                case "socket":
+                    result[att.wallid] += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,200,0)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
+                    break;
+                case "switch":
+                    result[att.wallid] += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,0,200)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
+                    break;
+            }
         }
     });
 
-    result += '</svg>\n';
+    WALLS.forEach(function (symbol) {
+        var att = symbol.attributes;
+        result[att.id] += '</svg>\n'; 
+    });
 
     return result;
 }

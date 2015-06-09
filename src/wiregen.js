@@ -52,6 +52,13 @@ while(Symbols.length > 0)
     Symbols = grammar.evaluateGrammarStep(Symbols, TerminalSymbols, Grammar);
 }
 
+var wallsvg = svgexport.ExportTerminalsToSVG(TerminalSymbols);
+for (var w in wallsvg) {
+    var wall = wallsvg[w];
+    fs.writeFileSync(util.format("%s.svg", w), wall);
+}
+
+
 // grammar utility functions
 function getTerminalByAttribute(T, label, attname, attvalue)
 {
@@ -220,7 +227,6 @@ var WireTree = findWireTree(G, ROOT, EndPoints);
 
 // --------------------------------------------------------------------------------------------------------------------
 
-fs.writeFileSync("terminals.svg", svgexport.ExportTerminalsToSVG(TerminalSymbols));
 fs.writeFileSync("graph.svg", svgexport.ExportGraphToSVG(G));
 fs.writeFileSync("wire-graph.svg", svgexport.ExportGraphToSVG(WireTree));
 

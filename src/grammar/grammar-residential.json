@@ -1,9 +1,9 @@
 {
   "WALL" : [
-    { "label" : "vzone", "attributes" : { "pos": "att.left+150" } },
-    { "label" : "vzone", "attributes" : { "pos": "att.left+att.width-150" } },
-    { "label" : "hzone", "attributes" : { "pos": "300" } },
-    { "label" : "hzone", "attributes" : { "pos": "att.height-300" } },
+    { "label" : "vzone", "attributes" : { "pos": "att.left+150", "wallid":  "att.id" } },
+    { "label" : "vzone", "attributes" : { "pos": "att.left+att.width-150", "wallid":  "att.id" } },
+    { "label" : "hzone", "attributes" : { "pos": "300", "wallid":  "att.id" } },
+    { "label" : "hzone", "attributes" : { "pos": "att.height-300", "wallid":  "att.id" } },
     { "label" : "wall", "attributes"  : { "zone_width" : "200" } }
   ],
 
@@ -16,10 +16,6 @@
   "WINDOW" : [
     { "label" : "vzone", "attributes" : { "pos":"att.left-150" } },
     { "label" : "vzone", "attributes" : { "pos":"att.left+att.width+150" } },
-    { "label" : "window" }
-  ],
-
-  "WINDOW" : [
     { "label" : "window" }
   ],
 
