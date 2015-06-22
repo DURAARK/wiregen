@@ -2,9 +2,9 @@
   "WALL" : [
     { "label" : "vzone", "attributes" : { "pos": "att.left+150", "wallid":  "att.id" } },
     { "label" : "vzone", "attributes" : { "pos": "att.left+att.width-150", "wallid":  "att.id" } },
-    { "label" : "hzone", "attributes" : { "pos": "300", "wallid":  "att.id" } },
-    { "label" : "hzone", "attributes" : { "pos": "att.height-300", "wallid":  "att.id" } },
-    { "label" : "wall", "attributes"  : { "zone_width" : "200" } }
+    { "label" : "hzone", "attributes" : { "pos": "att.top+300", "wallid":  "att.id" } },
+    { "label" : "hzone", "attributes" : { "pos": "att.top+att.height-300", "wallid":  "att.id" } },
+    { "label" : "wall",  "attributes" : { "zone_width" : "200" } }
   ],
 
   "DOOR" : [
@@ -20,14 +20,14 @@
   ],
 
   "SOCKET" : [
-    { "label" : "socket" }
+    { "label" : "socket" , "attributes" : { "endpoint":"true" } }
   ],
 
   "SWITCH" : [
-    { "label" : "switch" }
+    { "label" : "switch" , "attributes" : { "endpoint":"true" }}
   ],
 
   "ROOT" : [
-    { "label" : "root" }
+    { "label" : "root" , "attributes" : { "root":"true" }}
   ]
 }
