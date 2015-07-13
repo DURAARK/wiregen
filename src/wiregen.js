@@ -4,11 +4,13 @@
 // 
 // ulrich.krispel@vc.fraunhofer.at
 //
-var fs=require('fs')
-var path=require('path')
+var fs = require('fs');
+var path = require('path');
 var util = require('util');
 var pkg=require( path.join(__dirname, 'package.json') );
 var program = require('commander');
+
+
 
 var vec = require('./vec');
 var wgutil = require('./wgutil');
