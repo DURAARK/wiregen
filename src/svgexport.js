@@ -52,7 +52,7 @@ function ExportTerminalsToSVG(symbols)
         var att = symbol.attributes;
         if (att.hasOwnProperty('wallid')) {
             var bb = resultbb[att.wallid];
-            console.log("looking at symbol " + symbol.label);
+            //console.log("looking at symbol " + symbol.label);
             switch(symbol.label)
             {
                 case "hzone":
@@ -103,7 +103,21 @@ function ExportGraphToSVG(G, wallid, bb)
     for (var n in G.N) {
         var v = G.N[n];
         if (v.wallid == wallid) {
-            result += util.format('<text x="%s" y="%s">V%s</text>',v.x*s,v.y*s,n);
+            //result += util.format('<text x="%s" y="%s">V%s</text>',v.x*s,v.y*s,n);
+            if (v.terminal) {
+                var att = v.terminal.attributes;
+                switch (v.terminal.label) {
+                    case "socket":
+                        result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,200,0)" />\n', att.left * s, att.top * s, att.width * s, att.height * s);
+                        break;
+                    case "switch":
+                        result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,0,200)" />\n', att.left * s, att.top * s, att.width * s, att.height * s);
+                        break;
+                    case "root":
+                        result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,0,200)" />\n', att.left * s, att.top * s, att.width * s, att.height * s);
+                        break;
+                }
+            }
             result += util.format('<circle cx="%s" cy="%s" r="3" stroke="black" stroke-width="1" fill="black" />\n', v.x * s, v.y * s);
         }
     }

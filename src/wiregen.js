@@ -183,6 +183,7 @@ TerminalSymbols.forEach(function (t) {
 
             var q = graph2d.edgePointProjection(G, G.E[minedge], p);
             q.wallid = p.wallid;
+            q.terminal = p.terminal;
             var v = graph2d.splitGraphEdge(G, G.E[minedge], q);
             var endpoint;
             if (p.sub(q).length() > wall.attributes.zone_width/2)
@@ -231,7 +232,7 @@ for (var vid in G.N)
     }
 
 }
-console.log(WALLCONN);
+//console.log(WALLCONN);
  for (var conn in WALLCONN) {
     if (Object.keys(WALLCONN[conn]).length == 2) {
         var K = Object.keys(WALLCONN[conn]);
@@ -249,7 +250,9 @@ console.log(WALLCONN);
             }
         }                
     } else {
-        console.log("BRAK.");
+        if (Object.keys(WALLCONN[conn]).length > 2) {
+            console.log("not handled connectivity case!");
+        }
     }
 }
 
@@ -314,4 +317,5 @@ for (var wallid in WALLS) {
 }
 
 //fs.writeFileSync("wire-graph.svg", svgexport.ExportGraphToSVG(WireTree));
+console.log("=== WireGen Finished ===");
 
