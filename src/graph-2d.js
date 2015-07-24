@@ -118,9 +118,11 @@ function splitGraphEdge(G, e, p)
 // calculate intersections with all other graph edges
 function insertArrangementEdge(G, v0, v1)
 {
-    v0 = G.checkVertex(v0);
-    v1 = G.checkVertex(v1);
+    var v0 = G.checkVertex(v0);
+    var v1 = G.checkVertex(v1);
     var splitEdges = [ new graph.Edge(v0,v1).toString() ];
+    
+    if (v0.wallid != v1.wallid) { console.log("BRAK."); }
 
     // simple case
     if (Object.keys(G.E).length == 0)
@@ -133,28 +135,29 @@ function insertArrangementEdge(G, v0, v1)
     while(doIntersection)
     {
         var Continue = false;
-        for (var e in G.E)
-        {
+        for (var e in G.E) {
+            // consider only edges from this wall
             var ge = new graph.Edge(e);
-            for (var seid in splitEdges)
-            {
-                var se = new graph.Edge(splitEdges[seid]);
-                var p = edgeIntersection(G, ge, se);
-                // perform split
-                if (p != null)
-                {
-                    Continue = true;
-                    // split e: insert vertex in graph
-                    p = G.checkVertex(p);
-                    // remove edge from graph
-                    G.removeEdge(ge.toString());
-                    // add new edges in graph
-                    G.addEdge(G.N[ge.v0],p);
-                    G.addEdge(p, G.N[ge.v1]);
-                    util.removeArrObj(splitEdges, se.toString());
-                    splitEdges.push(new graph.Edge(G.N[se.v0], p).toString());
-                    splitEdges.push(new graph.Edge(p, G.N[se.v1]).toString());
-                    break;
+            if (G.N[ge.v0].wallid == v0.wallid) {
+                for (var seid in splitEdges) {
+                    var se = new graph.Edge(splitEdges[seid]);
+                    var p = edgeIntersection(G, ge, se);
+                    // perform split
+                    if (p != null) {
+                        p.wallid = v0.wallid;
+                        Continue = true;
+                        // split e: insert vertex in graph
+                        p = G.checkVertex(p);
+                        // remove edge from graph
+                        G.removeEdge(ge.toString());
+                        // add new edges in graph
+                        G.addEdge(G.N[ge.v0], p);
+                        G.addEdge(p, G.N[ge.v1]);
+                        util.removeArrObj(splitEdges, se.toString());
+                        splitEdges.push(new graph.Edge(G.N[se.v0], p).toString());
+                        splitEdges.push(new graph.Edge(p, G.N[se.v1]).toString());
+                        break;
+                    }
                 }
             }
             if (Continue==true) break;

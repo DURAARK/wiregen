@@ -2,10 +2,11 @@
 // simple 2d vector and axis aligned bounding boxes (AABB)
 // ulrich.krispel@vc.fraunhofer.at
 
-function Vec2(x, y)
+function Vec2(x, y, wallid)
 {
     this.x = x !== undefined ? x : 0;
     this.y = y !== undefined ? y : 0;
+    this.wallid = wallid;
 }
 Vec2.prototype.add = function(other)
 {
@@ -25,7 +26,7 @@ Vec2.prototype.length = function()
 };
 Vec2.prototype.equals = function(other)
 {
-    return (this.x == other.x && this.y == other.y);
+    return (this.x == other.x && this.y == other.y && this.wallid == other.wallid);
 };
 
 function AABB(bbmin, bbmax)

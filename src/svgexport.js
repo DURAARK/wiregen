@@ -83,7 +83,8 @@ function ExportTerminalsToSVG(symbols)
 }
 
 
-function ExportGraphToSVG(G) {
+function ExportGraphToSVG(G, wallid) 
+{
 
     var s = 0.1;    // scale
 
@@ -91,20 +92,26 @@ function ExportGraphToSVG(G) {
     var bb = new vec.AABB();
     for (var n in G.N) {
         var v = G.N[n];
-        bb.insert(v.x, v.y);
+        if (v.wallid == wallid) {
+            bb.insert(v.x, v.y);
+        }
     }
     var result = util.format('<svg width="%s" height="%s" version="1.1" xmlns="http://www.w3.org/2000/svg">\n', bb.width()*s, bb.height()*s);
     // draw vertices
     for (var n in G.N) {
         var v = G.N[n];
-        result += util.format('<circle cx="%s" cy="%s" r="3" stroke="black" stroke-width="1" fill="black" />\n', v.x*s, v.y*s);
+        if (v.wallid == wallid) {
+            result += util.format('<circle cx="%s" cy="%s" r="3" stroke="black" stroke-width="1" fill="black" />\n', v.x * s, v.y * s);
+        }
     }
     // draw edges
     for (var eid in G.E) {
         var e = G.E[eid];
         var v0 = G.N[e.v0];
         var v1 = G.N[e.v1];
-        result += util.format('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke-dasharray="10,10" style="stroke:rgb(255,0,0);stroke-width:2;" />\n', v0.x*s, v0.y*s, v1.x*s, v1.y*s);
+        if (v0.wallid == wallid) {
+            result += util.format('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke-dasharray="10,10" style="stroke:rgb(255,0,0);stroke-width:2;" />\n', v0.x * s, v0.y * s, v1.x * s, v1.y * s);
+        }
     }
     result += '</svg>\n';
     return result;

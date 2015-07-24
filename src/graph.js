@@ -115,6 +115,9 @@ Graph.prototype.getAdjacency = function(v)
 
 Graph.prototype.addEdge = function(v0, v1)
 {
+    if (!v0.wallid || !v1.wallid) {
+        console.log("brak");
+    }
     if (!('root' in this)) this['root'] = v0;
     v0 = this.checkVertex(v0);
     v1 = this.checkVertex(v1);
@@ -186,19 +189,19 @@ Graph.prototype.addPathFromGraph = function addPath(G, path) {
 
 Graph.prototype.checkIntegrity = function () {
     // every vertex has to have a valid id
-    for (v in this.N) {
+    for (var v in this.N) {
         if (!this.N[v].hasOwnProperty('_id')) {
             return false;
         }
     }
     // check edge links
-    for (e in this.E) {
+    for (var e in this.E) {
         var edge = new Edge(e);
         if (edge.v0 != this.E[e].v0) return false;
         if (edge.v1 != this.E[e].v1) return false;
     }
     // check vertex adjacency links
-    for (a in this.A) {
+    for (var a in this.A) {
         if (!(a in this.N)) return false;
         var adjacent = this.A[a];
         for (adj in adjacent) {
@@ -208,6 +211,26 @@ Graph.prototype.checkIntegrity = function () {
     }
     return true;
 };
+
+Graph.prototype.exportToGraphViz = function ()
+{
+    var dot = "";
+
+    dot += "digraph G {\n";
+    for (var v in this.N) {
+        dot += " V" + v + " [label=\"V" + v + ":" + this.N[v].wallid;
+        if (v.terminal) {
+            dot += "-" + v.terminal.label;
+        }
+        dot += "\"]\n";
+    }
+    for (var e in this.E) {
+        var edge = new Edge(e);
+        dot += " V" + edge.v0 + " -> V" + edge.v1 + "\n";
+    }
+    dot += "}\n";
+    return dot;
+}
 
 module.exports =
 {
