@@ -88,9 +88,8 @@ mkdirSync(program.output + "svg_grammar");
 var wallsvg = svgexport.ExportTerminalsToSVG(TerminalSymbols);
 for (var w in wallsvg) {
     var wall = wallsvg[w];
-    fs.writeFileSync(util.format("svg_grammar/%s.svg", w), wall);
+    fs.writeFileSync(util.format("%s/svg_grammar/%s.svg", program.output, w), wall);
 }
-
 // -------------------------------------------------------------------------------
 // build installation zone graph
 
@@ -254,23 +253,10 @@ console.log(WALLCONN);
     }
 }
 
-// debug
-TerminalSymbols.forEach(function (t) {
-    if (t.label == "wall") {
-        var wallid = t.attributes.id;
-        fs.writeFileSync(util.format("graph-all-%s.svg", wallid), svgexport.ExportGraphToSVG(G, wallid));
-    }
-});
-
-
-fs.writeFileSync("iz-graph.json", JSON.stringify(G));
-fs.writeFileSync("iz-graph.dot", G.exportToGraphViz());
-
-//console.log("==Endpoints:");
-//console.log(EndPoints);
-//console.log("==Terminals:");
-//console.log(TerminalSymbols);
-
+//// debug
+//for (var wallid in WALLS) {
+//    fs.writeFileSync(util.format("graph-all-%s.svg", wallid), svgexport.ExportGraphToSVG(G, wallid));
+//}
 
 // --------------------------------------------------------------------------------------------------------------------
 // WIRE HYPOTHESIS
@@ -285,8 +271,7 @@ function findWireTree(G, root, EndPoints)
     wgutil.removeArrObj(EP, root);
     var i =0;
     // - find shortest path from current endpoint to tree, for all endpoints
-    while(EP.length > 0)
-    {
+    while(EP.length > 0) {
         var best = { path:{cost: Number.MAX_VALUE }, ep: null };
         for (var epid in EP)
         {
@@ -315,7 +300,18 @@ function findWireTree(G, root, EndPoints)
 var WireTree = findWireTree(G, ROOT, EndPoints);
 //console.log(WireTree);
 
-// --------------------------------------------------------------------------------------------------------------------
+fs.writeFileSync(util.format("%s/iz-graph.json",program.output), JSON.stringify(G));
+fs.writeFileSync(util.format("%s/iz-graph.dot", program.output), G.exportToGraphViz());
 
-fs.writeFileSync("wire-graph.svg", svgexport.ExportGraphToSVG(WireTree));
+fs.writeFileSync(util.format("%s/hypothesis-graph.json", program.output), JSON.stringify(WireTree));
+fs.writeFileSync(util.format("%s/hypothesis-graph.dot", program.output), WireTree.exportToGraphViz());
+
+
+// --------------------------------------------------------------------------------------------------------------------
+mkdirSync(program.output + "svg_hypothesis");
+for (var wallid in WALLS) {
+    fs.writeFileSync(util.format("%s/svg_hypothesis/%s.svg", program.output, wallid), svgexport.ExportGraphToSVG(WireTree, wallid, WALLS[wallid].bb));
+}
+
+//fs.writeFileSync("wire-graph.svg", svgexport.ExportGraphToSVG(WireTree));
 

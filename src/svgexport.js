@@ -83,17 +83,19 @@ function ExportTerminalsToSVG(symbols)
 }
 
 
-function ExportGraphToSVG(G, wallid) 
+function ExportGraphToSVG(G, wallid, bb) 
 {
 
     var s = 0.1;    // scale
 
-    // get bounding box
-    var bb = new vec.AABB();
-    for (var n in G.N) {
-        var v = G.N[n];
-        if (v.wallid == wallid) {
-            bb.insert(v.x, v.y);
+    // get bounding box if not supplied
+    if (!bb) {
+        bb = new vec.AABB();
+        for (var n in G.N) {
+            var v = G.N[n];
+            if (v.wallid == wallid) {
+                bb.insert(v.x, v.y);
+            }
         }
     }
     var result = util.format('<svg width="%s" height="%s" version="1.1" xmlns="http://www.w3.org/2000/svg">\n', bb.width()*s, bb.height()*s);
@@ -110,7 +112,7 @@ function ExportGraphToSVG(G, wallid)
         var e = G.E[eid];
         var v0 = G.N[e.v0];
         var v1 = G.N[e.v1];
-        if (v0.wallid == wallid) {
+        if (v0.wallid == wallid && v1.wallid==wallid) {
             result += util.format('<line x1="%d" y1="%d" x2="%d" y2="%d" stroke-dasharray="10,10" style="stroke:rgb(255,0,0);stroke-width:2;" />\n', v0.x * s, v0.y * s, v1.x * s, v1.y * s);
         }
     }
