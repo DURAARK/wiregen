@@ -78,15 +78,21 @@ is encoded by an axis aligned bounding box with attribute names \emph{left},\emp
 {
 	\begin{tikzpicture}[auto,arrow/.style={draw,very thick, -latex'}]
     \coordinate (V1) at (0,0);
+    \coordinate (V1a) at (0,0.2);
     \coordinate (V2a) at (4,0);
     \coordinate (V2b) at (4.2,0);
     \coordinate (V3) at (7,0);
+    \coordinate (V3a) at (7,0.2);
     \coordinate (V4) at (4.2,-2);
     \coordinate (V5) at (7,-2);
     \coordinate (V6) at (0,-5);
     \coordinate (V7) at (4,-5);
+
+    \coordinate (V8) at (0,2);
+    \coordinate (V9) at (7,2);
+
     % vertices
-    \foreach \p/\lbl in {(V1)/1,(V2a)/2,(V2b)/,(V3)/3,(V4)/4,(V5)/5,(V6)/6,(V7)/7}
+    \foreach \p/\lbl in {(V1)/1,(V2a)/2,(V2b)/,(V3)/3,(V4)/4,(V5)/5,(V6)/6,(V7)/7,(V8)/8,(V9)/9}
 		{
       \fill \p circle (2pt) node[above right] {\lbl};
 		}
@@ -96,7 +102,11 @@ is encoded by an axis aligned bounding box with attribute names \emph{left},\emp
 		{
 		  \draw[arrow] \a -- \b node[midway, color=black,above right] {\lbl};
 		}
-		\foreach \a/\b/\lbl in {(V2b)/(V4)/wall4,(V4)/(V5)/wall5,(V5)/(V3)/wall6,(V3)/(V2b)/wall7}
+		\foreach \a/\b/\lbl in {(V4)/(V2b)/wall4,(V5)/(V4)/wall5,(V3)/(V5)/wall6,(V2b)/(V3)/wall7}
+		{
+		  \draw[arrow] \a -- \b node[midway, color=black,above right] {\lbl};
+		}	
+		\foreach \a/\b/\lbl in {(V8)/(V9)/wall8,(V9)/(V3a)/wall9,(V3a)/(V1a)/wall10,(V1a)/(V8)/wall11}
 		{
 		  \draw[arrow] \a -- \b node[midway, color=black,above right] {\lbl};
 		}	
