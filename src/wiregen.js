@@ -43,13 +43,20 @@ function getTerminalByAttribute(T, label, attname, attvalue) {
     }
     return null;
 }
-
+var mkdirSync = function (path) {
+    try {
+        fs.mkdirSync(path);
+    } catch (e) {
+        if (e.code != 'EEXIST') throw e;
+    }
+}
 
 // Parse command line options
 program
     .version(pkg.version)
     .option('-i, --input [json]', 'Set Input Symbols', 'input.json')
     .option('-g, --grammar [json]', 'Set Installation Zone Grammar', 'grammar.json')
+    .option('-o, --output [dir]', 'Set Output Directory', './')
     .parse(process.argv);
 
 // read installation zone grammar
@@ -77,10 +84,11 @@ TerminalSymbols.forEach(function (t) {
 });
 
 // write SVG with terminal symbols (objects + installation zones)
+mkdirSync(program.output + "svg_grammar");
 var wallsvg = svgexport.ExportTerminalsToSVG(TerminalSymbols);
 for (var w in wallsvg) {
     var wall = wallsvg[w];
-    fs.writeFileSync(util.format("%s.svg", w), wall);
+    fs.writeFileSync(util.format("svg_grammar/%s.svg", w), wall);
 }
 
 // -------------------------------------------------------------------------------
@@ -196,13 +204,67 @@ TerminalSymbols.forEach(function (t) {
     }
 });
 
+// Connect wall segments
+var WALLCONN = {};
+
+function insertWallConnection(connid, v)
+{
+    if (!WALLCONN.hasOwnProperty(connid)) {
+        WALLCONN[connid] = {};
+    }
+    if (!WALLCONN[connid].hasOwnProperty(v.wallid)) {
+        WALLCONN[connid][v.wallid] = {};
+    }
+    WALLCONN[connid][v.wallid][v._id] = v;
+}
+
+for (var vid in G.N)
+{
+    // determine if this vertex is on left or right side of a wall
+    var v = G.N[vid];
+    if (Math.abs(v.x - WALLS[v.wallid].bb.bbmin.x) < 2) {
+        var connid = WALLS[v.wallid].attributes.connleft;
+        insertWallConnection(connid, v);
+    }
+    if (Math.abs(v.x - WALLS[v.wallid].bb.bbmax.x) < 2) {
+        var connid = WALLS[v.wallid].attributes.connright;
+        insertWallConnection(connid, v);
+    }
+
+}
+console.log(WALLCONN);
+ for (var conn in WALLCONN) {
+    if (Object.keys(WALLCONN[conn]).length == 2) {
+        var K = Object.keys(WALLCONN[conn]);
+        var A = WALLCONN[conn][K[0]];
+        var B = WALLCONN[conn][K[1]];
+        // connect points at similar height
+        for (var va in A) {
+            var VA = A[va];
+            for (var vb in B) {
+                var VB = B[vb];
+                if (Math.abs(VA.y - VB.y) < 2) {
+                    console.log(util.format("connecting %s<->%s at %s-%s", Object.keys(WALLCONN[conn])[0], Object.keys(WALLCONN[conn])[1]),va,vb);
+                    G.addEdge(VA, VB);
+                }
+            }
+        }                
+    } else {
+        console.log("BRAK.");
+    }
+}
+
+// debug
 TerminalSymbols.forEach(function (t) {
     if (t.label == "wall") {
         var wallid = t.attributes.id;
-        fs.writeFileSync(util.format("graph-%s.svg", wallid), svgexport.ExportGraphToSVG(G, wallid));
+        fs.writeFileSync(util.format("graph-all-%s.svg", wallid), svgexport.ExportGraphToSVG(G, wallid));
     }
 });
 
+
+fs.writeFileSync("iz-graph.json", JSON.stringify(G));
+fs.writeFileSync("iz-graph.dot", G.exportToGraphViz());
 
 //console.log("==Endpoints:");
 //console.log(EndPoints);
@@ -249,9 +311,6 @@ function findWireTree(G, root, EndPoints)
     }
     return T;
 }
-
-fs.writeFileSync("iz-graph.json", JSON.stringify(G));
-fs.writeFileSync("iz-graph.dot", G.exportToGraphViz());
 
 var WireTree = findWireTree(G, ROOT, EndPoints);
 //console.log(WireTree);

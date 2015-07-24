@@ -10,7 +10,10 @@
       "height" : 2400,
       "origin" : [ 0, 3000, 2400 ],
       "x" : [ 1, 0, 0],
-      "y" : [ 0, 0, -1]
+      "y" : [ 0, 0, -1],
+      "connleft" : 1,
+      "connright" : 2,
+      "conncrossling" : []
     },
     "left": 1,
     "right": 2,
@@ -26,7 +29,10 @@
       "height" : 2400,
       "origin" : [ 4000, 3000, 2400 ],
       "x" : [ 0, -1, 0],
-      "y" : [ 0, 0, -1]
+      "y" : [ 0, 0, -1],
+      "connleft" : 2,
+      "connright" : 3,
+      "conncrossling" : []
     },
     "left": 2,
     "right": 3,

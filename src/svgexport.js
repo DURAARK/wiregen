@@ -101,6 +101,7 @@ function ExportGraphToSVG(G, wallid)
     for (var n in G.N) {
         var v = G.N[n];
         if (v.wallid == wallid) {
+            result += util.format('<text x="%s" y="%s">V%s</text>',v.x*s,v.y*s,n);
             result += util.format('<circle cx="%s" cy="%s" r="3" stroke="black" stroke-width="1" fill="black" />\n', v.x * s, v.y * s);
         }
     }
