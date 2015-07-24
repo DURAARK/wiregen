@@ -130,13 +130,6 @@ TerminalSymbols.forEach(function (t)
     //fs.writeFileSync(util.format("step-%d.svg",i++), svgexport.ExportGraphToSVG(G));
 });
 
-TerminalSymbols.forEach(function (t) {
-    if (t.label == "wall") {
-        var wallid = t.attributes.id;
-        fs.writeFileSync(util.format("graph-%s.svg", wallid), svgexport.ExportGraphToSVG(G, wallid));
-    }
-});
-
 // remove segments that overlap with openings
 TerminalSymbols.forEach(function (t) {
     if (t.label=='door' || t.label=='window')
@@ -144,60 +137,72 @@ TerminalSymbols.forEach(function (t) {
         // test if any graph edge overlaps with an 'obstacle'
         for (var e in G.E)
         {
-            if (graph2d.edgeAABBIntersection(G, G.E[e], t.attributes))
-            {
-                G.removeEdge(e);
+            if (graph2d.edgeAABBIntersection(G, G.E[e], t.attributes)) {
+                if (t.wallid == G.N[G.E[e].v0].wallid) {
+                    G.removeEdge(e);
+                }
             }
         }
     }
 });
 
+
 var ROOT = null;
 
-//// insert detections: insert as node if "near" to zone, connect to nearest zone otherwise
-//TerminalSymbols.forEach(function (t) {
-//    if (t.label=='switch' || t.label=='socket' || t.label=='root') {
-//        var a = t.attributes;
-//        var p = new vec.Vec2(a.left + a.width / 2, a.top + a.height / 2, a.wallid);
-//        p.terminal = t;
-//        // get line with minimal normal projection distance
-//        var mindist=Number.MAX_VALUE;
-//        var minedge=null;
-//        for (var e in G.E) {
-//            var dist = graph2d.pointEdgeDist(G, G.E[e], p);
-//            if (dist != null) {
-//                if (dist < mindist) {
-//                    mindist = dist;
-//                    minedge = e;
-//                }
-//            }
-//        }
-//        if (minedge != null) {
-//            // shortest edge was found
-//            var wall = getTerminalByAttribute(TerminalSymbols, 'wall', 'id', a.wallid);
-//            if (wall != null)
+// insert detections: insert as node if "near" to zone, connect to nearest zone otherwise
+TerminalSymbols.forEach(function (t) {
+    if (t.label=='switch' || t.label=='socket' || t.label=='root') {
+        var a = t.attributes;
+        var p = new vec.Vec2(a.left + a.width / 2, a.top + a.height / 2, a.wallid);
+        p.terminal = t;
+        // get line with minimal normal projection distance
+        var mindist=Number.MAX_VALUE;
+        var minedge=null;
+        for (var e in G.E) {
+            if (G.N[G.E[e].v0].wallid == a.wallid) {
+                var dist = graph2d.pointEdgeDist(G, G.E[e], p);
+                if (dist != null) {
+                    if (dist < mindist) {
+                        mindist = dist;
+                        minedge = e;
+                    }
+                }
+            }
+        }
+        if (minedge != null) {
+            // shortest edge was found
+            var wall = getTerminalByAttribute(TerminalSymbols, 'wall', 'id', a.wallid);
+            if (wall != null)
 
-//            var q = graph2d.edgePointProjection(G, G.E[minedge], p);
-//            q.wallid = p.wallid;
-//            var v = graph2d.splitGraphEdge(G, G.E[minedge], q);
-//            var endpoint;
-//            if (p.sub(q).length() > wall.attributes.zone_width/2)
-//            {
-//                // add an additional edge, TODO:check for occluders
-//                G.addEdge(p,q);
-//                endpoint = { pos:p, terminal:t };
-//            } else {
-//                // inside installation zone
-//                endpoint = { pos:q, terminal:t };
-//            }
-//            EndPoints.push(endpoint);
-//            if (t.label == 'root')
-//            {
-//                ROOT = endpoint;
-//            }
-//        }
-//    }
-//});
+            var q = graph2d.edgePointProjection(G, G.E[minedge], p);
+            q.wallid = p.wallid;
+            var v = graph2d.splitGraphEdge(G, G.E[minedge], q);
+            var endpoint;
+            if (p.sub(q).length() > wall.attributes.zone_width/2)
+            {
+                // add an additional edge, TODO:check for occluders
+                G.addEdge(p,q);
+                endpoint = { pos:p, terminal:t };
+            } else {
+                // inside installation zone
+                endpoint = { pos:q, terminal:t };
+            }
+            EndPoints.push(endpoint);
+            if (t.label == 'root')
+            {
+                ROOT = endpoint;
+            }
+        }
+    }
+});
+
+TerminalSymbols.forEach(function (t) {
+    if (t.label == "wall") {
+        var wallid = t.attributes.id;
+        fs.writeFileSync(util.format("graph-%s.svg", wallid), svgexport.ExportGraphToSVG(G, wallid));
+    }
+});
+
 
 //console.log("==Endpoints:");
 //console.log(EndPoints);
