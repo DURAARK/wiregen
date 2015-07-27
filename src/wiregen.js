@@ -96,7 +96,8 @@ TerminalSymbols.forEach(function (t) {
 });
 
 // write SVG with terminal symbols (objects + installation zones)
-mkdirSync(program.output + "svg_grammar");
+mkdirSync(program.output);
+mkdirSync(program.output + "/svg_grammar");
 var wallsvg = svgexport.ExportTerminalsToSVG(TerminalSymbols);
 for (var w in wallsvg) {
     var wall = wallsvg[w];
@@ -333,7 +334,7 @@ fs.writeFileSync(util.format("%s/hypothesis-graph.dot", program.output), WireTre
 
 
 // --------------------------------------------------------------------------------------------------------------------
-mkdirSync(program.output + "svg_hypothesis");
+mkdirSync(program.output + "/svg_hypothesis");
 for (var wallid in WALLS) {
     fs.writeFileSync(util.format("%s/svg_hypothesis/%s.svg", program.output, wallid), svgexport.ExportGraphToSVG(WireTree, wallid, WALLS[wallid].bb));
 }
