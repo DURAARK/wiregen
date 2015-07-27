@@ -69,6 +69,18 @@ console.log('* reading semantic entities from %s', program.input);
 Symbols = readJSON(program.input);
 console.log('parsed %d entities', Symbols.length);
 
+// adapt input
+Symbols.forEach(function (s) {
+  if (s.label=="WALL")
+  {
+    var a = s.attributes;
+    if (s.hasOwnProperty('left')) { a['connleft'] = s.left; }
+    if (s.hasOwnProperty('right')) { a['connright'] = s.right; }
+    if (s.hasOwnProperty('crosslink')) { a['conncrosslink'] = s.crosslink; }
+  }
+});
+
+
 // -------------------------------------------------------------------------------
 // evaluate the grammar
 while(Symbols.length > 0)
@@ -157,7 +169,8 @@ TerminalSymbols.forEach(function (t) {
 var ROOT = null;
 
 // insert detections: insert as node if "near" to zone, connect to nearest zone otherwise
-TerminalSymbols.forEach(function (t) {
+for (var ts in TerminalSymbols) {
+    var t = TerminalSymbols[ts];
     if (t.label=='switch' || t.label=='socket' || t.label=='root') {
         var a = t.attributes;
         var p = new vec.Vec2(a.left + a.width / 2, a.top + a.height / 2, a.wallid);
@@ -202,7 +215,16 @@ TerminalSymbols.forEach(function (t) {
             }
         }
     }
-});
+}
+
+if (ROOT == null) {
+    console.log("WARNING: no root found, using an endpoint.");
+    if (EndPoints.length > 0) {
+        ROOT = EndPoints[0];
+    } else {
+        console.log("ERROR: no endpoints.");
+    }
+}
 
 // Connect wall segments
 var WALLCONN = {};
