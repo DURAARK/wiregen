@@ -8,7 +8,7 @@ function readJSON(filename)
 }
 
 var input = readJSON("input/nygade-1001/nygade_1001_offset.json");
-var process = input.Walls;
+var process = input.Walls.slice(0);
 var sorted = [];
 
 console.log(input);
@@ -21,6 +21,7 @@ while(process.length > 0)
   while (corner != first.left)
   {
     // find wall with left corner
+    var found=false;
     for (var w in process)
     {
       var wall = process[w];
@@ -28,8 +29,14 @@ while(process.length > 0)
         sorted.push(wall);
         corner = wall.right;
         process.splice(w, 1); 
+        found=true;
         break; 
       }
+    }
+    if (found==false) 
+    {
+      console.log("loop not closed.");
+      break;
     }
   }
 }
