@@ -88,12 +88,44 @@ while(Symbols.length > 0)
     Symbols = grammar.evaluateGrammarStep(Symbols, TerminalSymbols, Grammar);
 }
 
+// collect walls
 TerminalSymbols.forEach(function (t) {
     if (t.label == "wall") {
         t.bb = new vec.AABB();
         WALLS[t.attributes.id] = t;
     }
 });
+
+// cyclic sort
+var WALLORDER = [];
+{
+    // build left index
+    var LEFT = {}
+    for (var w in WALLS) { LEFT[WALLS[w].attributes.connleft] = WALLS[w]; }
+    
+    while (Object.keys(LEFT).length > 0) {
+        var current = LEFT[Object.keys(LEFT)[0]];
+        var corder = [];
+        do {
+            corder.push(current.attributes.id);               // add to ordered list
+            delete LEFT[current.attributes.connleft];         // remove entry
+            current = LEFT[current.attributes.connright];     // move to next
+        } while (current);
+        WALLORDER.push(corder);
+    }
+}
+console.log("WALL ORDER:");
+console.log(WALLORDER);
+
+var SVG_HTML = "<html><body>\n";
+WALLORDER.forEach(function (cycle) {
+    cycle.forEach(function (id) {
+        SVG_HTML += '<img src="' + id + '.svg">\n';
+    });
+    SVG_HTML += '<br>\n\n'
+});
+SVG_HTML += "</body></html>\n";
+
 
 // write SVG with terminal symbols (objects + installation zones)
 mkdirSync(program.output);
@@ -103,6 +135,7 @@ for (var w in wallsvg) {
     var wall = wallsvg[w];
     fs.writeFileSync(util.format("%s/svg_grammar/%s.svg", program.output, w), wall);
 }
+fs.writeFileSync(util.format("%s/svg_grammar/index.html", program.output), SVG_HTML);
 // -------------------------------------------------------------------------------
 // build installation zone graph
 
@@ -357,6 +390,7 @@ mkdirSync(program.output + "/svg_hypothesis");
 for (var wallid in WALLS) {
     fs.writeFileSync(util.format("%s/svg_hypothesis/%s.svg", program.output, wallid), svgexport.ExportGraphToSVG(WireTree, wallid, WALLS[wallid].bb));
 }
+fs.writeFileSync(util.format("%s/svg_hypothesis/index.html", program.output), SVG_HTML);
 
 //fs.writeFileSync("wire-graph.svg", svgexport.ExportGraphToSVG(WireTree));
 console.log("=== WireGen Finished ===");
