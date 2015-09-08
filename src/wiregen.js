@@ -89,14 +89,21 @@ while(Symbols.length > 0)
 }
 
 // collect walls
+var numSockets = 0;
+var numSwitches = 0;
+var numWalls = 0;
 TerminalSymbols.forEach(function (t) {
     if (t.label == "wall") {
         t.bb = new vec.AABB();
         WALLS[t.attributes.id] = t;
+        numWalls = numWalls + 1;
     }
+    if (t.label == "socket") numSockets = numSockets + 1;
+    if (t.label == "switch") numSwitches = numSwitches + 1;
 });
+console.log("found " + numWalls + " walls, " + numSwitches + " switches and " + numSockets + " sockets.");
 
-// cyclic sort
+// get wall arrangements
 var WALLORDER = [];
 {
     // build left index
@@ -141,7 +148,7 @@ fs.writeFileSync(util.format("%s/svg_grammar/index.html", program.output), SVG_H
 
 var G = new graph.Graph();
 
-// get bounding box
+// calculate wall bounding boxes
 TerminalSymbols.forEach(function (symbol)
 {
     var att = symbol.attributes;
@@ -205,22 +212,23 @@ for (ts in TerminalSymbols) {
 var ROOT = null;
 // insert detections: insert as node if "near" to zone, connect to nearest zone otherwise
 for (var ts in TerminalSymbols) {
-    var t = TerminalSymbols[ts];
+    var term = TerminalSymbols[ts];
 
-    if (t.label == 'switch' || t.label == 'socket' || t.label == 'root') {
+    if (term.label == 'switch' || term.label == 'socket' || term.label == 'root') {
         var validEndPoint = true;
         // ignore if inside an opening
-        var a = t.attributes;
+        var a = term.attributes;
+        var posx = a.left + a.width / 2;
+        var posy = a.top + a.height / 2;
         for (var tso in TerminalSymbols) {
             var to = TerminalSymbols[tso];
             if (to.label == 'door' || to.label == 'window') {
                 if (to.attributes.wallid == a.wallid) {
                     var att = to.attributes;
                     var l = att.left, t = att.top, r = att.left + att.width, b = att.top + att.height;
-                    if ((att.left >= l && att.left <= r && att.top >= t && att.top <= b)) {
+                    if ((posx >= l && posx <= r && posy >= t && posy <= b)) {
                         validEndPoint = false;
-                    } else {
-                        console.log("endpoint inside opening.");
+                        console.log("endpoint " + term.label + " inside opening.");
                     }
                 }
             }
@@ -228,7 +236,7 @@ for (var ts in TerminalSymbols) {
         
         if (validEndPoint) {
             var p = new vec.Vec2(a.left + a.width / 2, a.top + a.height / 2, a.wallid);
-            p.terminal = t;
+            p.terminal = term;
             // get line with minimal normal projection distance
             var mindist = Number.MAX_VALUE;
             var minedge = null;
@@ -256,13 +264,13 @@ for (var ts in TerminalSymbols) {
                 if (p.sub(q).length() > wall.attributes.zone_width / 2) {
                     // add an additional edge, TODO:check for occluders
                     G.addEdge(p, q);
-                    endpoint = { pos: p, terminal: t };
+                    endpoint = { pos: p, terminal: term };
                 } else {
                     // inside installation zone
-                    endpoint = { pos: q, terminal: t };
+                    endpoint = { pos: q, terminal: term };
                 }
                 EndPoints.push(endpoint);
-                if (t.label == 'root') {
+                if (term.label == 'root') {
                     ROOT = endpoint;
                 }
             }
@@ -278,6 +286,12 @@ if (ROOT == null) {
         console.log("ERROR: no endpoints.");
     }
 }
+// Display endpoint statistics
+var epstat = { 'socket': 0, 'switch': 0 };
+for (var e in EndPoints) {
+    epstat[EndPoints[e].terminal.label] = epstat[EndPoints[e].terminal.label] + 1;
+}
+console.log(epstat);
 
 // Connect wall segments
 var WALLCONN = {};
@@ -376,7 +390,7 @@ function findWireTree(G, root, EndPoints)
 }
 
 var WireTree = findWireTree(G, ROOT, EndPoints);
-//console.log(WireTree);
+
 
 fs.writeFileSync(util.format("%s/iz-graph.json",program.output), JSON.stringify(G));
 fs.writeFileSync(util.format("%s/iz-graph.dot", program.output), G.exportToGraphViz());

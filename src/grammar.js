@@ -46,7 +46,7 @@ function evaluateGrammarStep(NT, T, G)
                     else                { result.push(N); }
 
                 } );
-                console.log(dbgtext);
+                //console.log(dbgtext);
             } else {
                 // rule not found
                 console.log("[ERROR] Rule %s not found", lhs.label);
