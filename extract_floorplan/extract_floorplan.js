@@ -72,6 +72,7 @@ AABB.prototype.toString = function() { return this.bbmin.toString() + "--" + thi
       // create new room
       room = {
         "label" : roomid,
+        "center" : new Vec2(),
         "walls" : [],
         "points" : []
       }
@@ -101,7 +102,6 @@ AABB.prototype.toString = function() { return this.bbmin.toString() + "--" + thi
           }
         }
       }
-      
       room.walls = ordered;
       
       // extract vertices for ordered wall cycle
@@ -112,6 +112,14 @@ AABB.prototype.toString = function() { return this.bbmin.toString() + "--" + thi
         totalbb.insert(v.x,v.y);
         room.points.push(v);
       }
+      
+      // calculate center
+      var roombb = new AABB();
+      room.points.forEach(function(p){ 
+        roombb.insert(p.x,p.y); 
+      });
+      room.center = roombb.center();
+      
       ROOMS.push(room);
   }
   console.log("total bounding box:" + totalbb);
@@ -120,27 +128,21 @@ AABB.prototype.toString = function() { return this.bbmin.toString() + "--" + thi
   var aspect = totalbb.width()/totalbb.height();
   var TARGET_WIDTH = 500;
   var TARGET_HEIGHT = TARGET_WIDTH/aspect;
-  var scale = TARGET_WIDTH / totalbb.width();
+  var scale = function(v,bb) { 
+    v.x = (v.x-totalbb.bbmin.x)*TARGET_WIDTH/totalbb.width();
+    v.y = (v.y-totalbb.bbmin.y)*TARGET_WIDTH/totalbb.width();
+  }
+  
   for (var r in ROOMS)
   {
     var room = ROOMS[r];
     for (var p in room.points)
     {
-      var v=room.points[p];
-      v.x -= totalbb.bbmin.x;
-      v.x *=scale;
-      v.y -= totalbb.bbmin.y;
-      v.y *=scale;
+      scale(room.points[p]);
     }
+    scale(room.center);
   }
   
-
-      //This is the accessor function we talked about above
-      var lineFunction = d3.svg.line()
-                               .x(function(d) { return d[0]; })
-                               .y(function(d) { return d[1]; })
-                               .interpolate("linear");
-
       //The SVG Container
       var svgContainer = d3.select("body").append("svg")
                                           .attr("width", TARGET_WIDTH)
@@ -158,11 +160,12 @@ AABB.prototype.toString = function() { return this.bbmin.toString() + "--" + thi
       var roomnames = svgContainer.selectAll("text")
                       .data(ROOMS)
                       .enter().append("text")
-                      .attr("x",function(d) { return d3.mean(d.points, function(p) { return p.x; })} )
-                      .attr("y",function(d) { return d3.mean(d.points, function(p) { return p.y; })} )
+                      .attr("x",function(d) { return d.center.x; } )
+                      .attr("y",function(d) { return d.center.y; } )
                       .attr("style", "font-family:Arial;font-size:10px")
                       .attr("text-anchor", "middle")
-                      .text(function(d) { return d.label; });
+                      .text(function(d) { return d.label; })
+                      .attr("onclick", function(d) { return "alert('"+d.label+"');"; });
 
       console.log(roomnames);
 
