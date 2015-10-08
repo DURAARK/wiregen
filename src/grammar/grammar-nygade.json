@@ -29,5 +29,22 @@
 
   "ROOT" : [
     { "label" : "root" , "attributes" : { "root":"true" }}
+  ],
+  "SOCKET:SOCKET" : [
+    { 
+      "vars" : { 
+        "BBA"   : "BB(A)",
+        "BBB"   : "BB(B)",
+        "group" : "BBA.insertBB(BBB)" 
+      },
+      "condition" : "DIFF(group.width(),BBA.width())<5",
+      "label" : "VGROUP",
+      "attributes" : {
+        "left": "group.left()",
+        "top": "group.top()",
+        "width": "group.width()",
+        "height": "group.height()"
+      }
+    }
   ]
 }
