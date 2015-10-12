@@ -64,9 +64,6 @@ function prepareRuleState(match)
         }
     }
     if (match.rule.hasOwnProperty('condition')) {
-        if (match.rule.rhs[0].label == "vzone") {
-            console.log("brak.");
-        }            
         match.evaluate = evaluateStatement(match, match.rule.condition) == true;
     }
 }

@@ -62,6 +62,9 @@
         {
           "label" : "vzone", 
           "attributes" : { "pos": "left+width/2" }
+        },
+        {
+          "label" : "vgroup"
         }
       ]
     },
@@ -79,9 +82,9 @@
       "vars" : { 
         "BBA"   : "BB(A)",
         "BBB"   : "BB(B)",
-        "group" : "BBA.insertBB(BBB)" 
+        "group" : "BB(A).insertBB(BBB)" 
       },
-      "condition" : "(DIFF(group.width(),BBA.width())<5) && (DIFF(group.width(),BBB.width())<5) && (A.wallid==B.wallid)",
+      "condition" : "(DIFF(group.width(),BBA.width())<5) && (DIFF(group.width(),BBB.width())<5) && ( group.height() < (BBA.height()+BBB.height()+5)) && (A.wallid==B.wallid)",
       "rhs" : [
         {
           "label" : "VGROUP",
@@ -122,9 +125,9 @@
       "vars" : { 
         "BBA"   : "BB(A)",
         "BBB"   : "BB(B)",
-        "group" : "BBA.insertBB(BBB)" 
+        "group" : "BB(A).insertBB(BBB)" 
       },
-      "condition" : "(DIFF(group.width(),BBA.width())<5) && (DIFF(group.width(),BBB.width())<5) && (A.wallid==B.wallid)",
+      "condition" : "(DIFF(group.width(),BBA.width())<5) && (DIFF(group.width(),BBB.width())<5) && ( group.height() < (BBA.height()+BBB.height()+5)) && (A.wallid==B.wallid)",
       "rhs" : [
         {
           "label" : "VGROUP",
@@ -158,5 +161,6 @@
         }
       ]
     }
-  ]  
+  ]
+  
 }
