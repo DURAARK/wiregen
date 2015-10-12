@@ -83,9 +83,10 @@ Symbols.forEach(function (s) {
 
 // -------------------------------------------------------------------------------
 // evaluate the grammar
-while(Symbols.length > 0)
+var steps = 0;
+while(grammar.evaluateGrammarStep(Symbols, TerminalSymbols, Grammar))
 {
-    Symbols = grammar.evaluateGrammarStep(Symbols, TerminalSymbols, Grammar);
+    steps = steps + 1;
 }
 
 // collect walls
