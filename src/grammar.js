@@ -28,17 +28,6 @@ function filterNT(NT, label)
     return filtered;
 }
 
-function prepareStatement(vars, statement)
-{
-    var s = statement;
-    for (var v in vars) {
-        if (s.indexOf(v) > -1) {
-            s = s.replace(v, "match.state." + v);
-        }
-    }
-    return s;
-}
-
 function evaluateStatement(match, statement)
 {
     // set available functions
