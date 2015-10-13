@@ -89,6 +89,8 @@ while(grammar.evaluateGrammarStep(Symbols, TerminalSymbols, Grammar))
     steps = steps + 1;
 }
 
+console.log("evaluation took " + steps + " steps.");
+
 // collect walls
 var numSockets = 0;
 var numSwitches = 0;
@@ -101,6 +103,7 @@ TerminalSymbols.forEach(function (t) {
     }
     if (t.label == "socket") numSockets = numSockets + 1;
     if (t.label == "switch") numSwitches = numSwitches + 1;
+    if (t.label == "vgroup") console.log("vgroup height:" + t.attributes.height);
 });
 console.log("found " + numWalls + " walls, " + numSwitches + " switches and " + numSockets + " sockets.");
 

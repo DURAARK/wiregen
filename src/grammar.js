@@ -90,7 +90,13 @@ function performRuleProductions(match)
                 N.attributes[attname] = evaluateStatement(match, rhs.attributes[attname]);
             }
         }
+        
         dbgout += rhs.label + " ";
+        //dbgout += rhs.label + "[";
+        //for (var a in N.attributes) {
+        //    dbgout += a + ":" + N.attributes[a] + ",";
+        //}
+        //dbgout += "] ";
         
         prod.push(N);
     }
@@ -137,8 +143,25 @@ function findMatch(NT, G)
                     }
                 }
             } else {
-                // TODO: elements of different labels
-                console.log("[WireGen] Grammar error: context sensitive match of different labels not implemented yet. Rule:" + label);
+                // match elements of different labels
+                var matchA = filterNT(NT, lblA);
+                var matchB = filterNT(NT, lblB);
+                for (var iA = 0; iA < matchA.length - 1; ++iA) {
+                    for (var iB = 0; iB < matchB.length; ++iB) {
+                        for (var iR = 0; iR < G[label].length; ++iR) {
+                            match.rule = G[label][iR];
+                            match.label = label;
+                            match.state.A = matchA[iA].attributes;
+                            match.state.B = matchB[iB].attributes;
+                            prepareRuleState(match);
+                            if (match.evaluate) {
+                                match.NT.push(matchA[iA]);
+                                match.NT.push(matchB[iB]);
+                                return match;
+                            }
+                        }
+                    }
+                }                
             }
         }
     }
