@@ -125,8 +125,8 @@ var WALLORDER = [];
         WALLORDER.push(corder);
     }
 }
-console.log("WALL ORDER:");
-console.log(WALLORDER);
+//console.log("WALL ORDER:");
+//console.log(WALLORDER);
 
 var SVG_HTML = "<html><body>\n";
 WALLORDER.forEach(function (cycle) {
@@ -156,15 +156,19 @@ var G = new graph.Graph();
 TerminalSymbols.forEach(function (symbol)
 {
     var att = symbol.attributes;
-    if (att.hasOwnProperty("id")) {
+    if (att["id"]) {
         var bb = WALLS[att["id"]].bb;
         bb.insert(att.left, att.top);
         bb.insert(att.left + att.width, att.top + att.height);
     }
-    if (att.hasOwnProperty("wallid")) {
-        var bb = WALLS[att["wallid"]].bb;
-        bb.insert(att.left, att.top);
-        bb.insert(att.left + att.width, att.top + att.height);
+    if (att["wallid"]) {
+        if (WALLS[att["wallid"]]) {
+            var bb = WALLS[att["wallid"]].bb;
+            bb.insert(att.left, att.top);
+            bb.insert(att.left + att.width, att.top + att.height);
+        } else {
+            console.log("terminal " + symbol.label + " wall id " + att.wallid + " not found!");
+        }
     }
 });
 
@@ -195,6 +199,7 @@ TerminalSymbols.forEach(function (t)
 });
 
 // remove segments that overlap with openings
+var removededges = 0;
 for (ts in TerminalSymbols) {
     t = TerminalSymbols[ts];
     if (t.label=='door' || t.label=='window')
@@ -204,14 +209,15 @@ for (ts in TerminalSymbols) {
         {
             if (t.attributes.wallid == G.N[G.E[e].v0].wallid) {
                 if (graph2d.edgeAABBIntersection(G, G.E[e], t.attributes)) {
-                    console.log("removing edge " + e);
+                    //console.log("removing edge " + e);
                     G.removeEdge(e);
+                    removededges++;
                 }
             }
         }
     }
 }
-
+console.log("removed " + removededges + " edges that overlapped with openings.");
 
 var ROOT = null;
 // insert detections: insert as node if "near" to zone, connect to nearest zone otherwise
@@ -232,7 +238,7 @@ for (var ts in TerminalSymbols) {
                     var l = att.left, t = att.top, r = att.left + att.width, b = att.top + att.height;
                     if ((posx >= l && posx <= r && posy >= t && posy <= b)) {
                         validEndPoint = false;
-                        console.log("endpoint " + term.label + " inside opening.");
+                        //console.log("endpoint " + term.label + " inside opening.");
                     }
                 }
             }
@@ -282,12 +288,13 @@ for (var ts in TerminalSymbols) {
     }
 }
 
-if (ROOT == null) {
+if (!ROOT) {
     console.log("WARNING: no root found, using an endpoint.");
     if (EndPoints.length > 0) {
         ROOT = EndPoints[0];
     } else {
         console.log("ERROR: no endpoints.");
+        return;
     }
 }
 // Display endpoint statistics
@@ -311,6 +318,29 @@ function insertWallConnection(connid, v)
     WALLCONN[connid][v.wallid][v._id] = v;
 }
 
+function clusterVerticesByY(vertices)
+{
+    var clusters = [];
+    // poor mans clustering, if necessary integrate a better method like 1D meanshift
+    for (var i=0; i < vertices.length; ++i) {
+        var v = vertices[i];
+        var notfound = true;
+        for (var c = 0; c < clusters.length && notfound; ++c) {
+            var cluster = clusters[c];
+            for (var j = 0; j < cluster.length && notfound; ++j) {
+                if (Math.abs(v.y - cluster[j].y) < 3) {
+                    cluster.push(v);
+                    notfound = false;
+                }
+            }
+        }
+        if (notfound) {
+            clusters.push([v]);
+        }
+    }
+    return clusters;
+}
+
 for (var vid in G.N)
 {
     // determine if this vertex is on left or right side of a wall
@@ -326,7 +356,27 @@ for (var vid in G.N)
 
 }
 //console.log(WALLCONN);
- for (var conn in WALLCONN) {
+for (var conn in WALLCONN) {
+    var connvertices = [];
+    //       cluster all vertices by y coordinate
+    for (var wconn in WALLCONN[conn]) {
+        for (var v in WALLCONN[conn][wconn]) {
+            connvertices.push(WALLCONN[conn][wconn][v]);
+        }
+    }
+    var clusters = clusterVerticesByY(connvertices);
+
+    for (var c = 0; c < clusters.length; ++c) {
+        var cluster = clusters[c];
+        //  create isolated connection vertex, wallid NaN always creates a new vertex
+        var cv = G.checkVertex(new vec.Vec2(0, cluster[0].y, NaN));
+        //  connect cluster edges
+        for (var i = 0; i < cluster.length; ++i) {
+            G.addEdge(cv, cluster[i]);
+        }
+    }
+
+    /*
     if (Object.keys(WALLCONN[conn]).length == 2) {
         var K = Object.keys(WALLCONN[conn]);
         var A = WALLCONN[conn][K[0]];
@@ -336,8 +386,8 @@ for (var vid in G.N)
             var VA = A[va];
             for (var vb in B) {
                 var VB = B[vb];
-                if (Math.abs(VA.y - VB.y) < 2) {
-                    console.log(util.format("connecting %s<->%s at %s-%s", Object.keys(WALLCONN[conn])[0], Object.keys(WALLCONN[conn])[1]),va,vb);
+                if (Math.abs(VA.y - VB.y) < 3) {
+                    console.log(util.format("connecting %s<->%s at %s-%s", Object.keys(WALLCONN[conn])[0], Object.keys(WALLCONN[conn])[1]), va, vb);
                     G.addEdge(VA, VB);
                 }
             }
@@ -347,6 +397,7 @@ for (var vid in G.N)
             console.log("not handled connectivity case!");
         }
     }
+    */
 }
 
 //// debug
@@ -365,7 +416,7 @@ function findWireTree(G, root, EndPoints)
     var v = G.isGraphVertex(root.pos);
     T.N[v._id]=v;
     wgutil.removeArrObj(EP, root);
-    var i =0;
+    var i = 0;
     // - find shortest path from current endpoint to tree, for all endpoints
     while(EP.length > 0) {
         var best = { path:{cost: Number.MAX_VALUE }, ep: null };
@@ -374,20 +425,33 @@ function findWireTree(G, root, EndPoints)
             var ep = EP[epid];
             //console.log("Processing EndPoint: %d,%d", ep.pos.x, ep.pos.y);
             var path = graph2d.getShortestPath(G, T, ep.pos);   // { edge: [], cost: <val> }
-            if (path.path.length > 0 && path.cost < best.path.cost) {
-                //console.log(util.format("found new best path, cost: %d, old best %d, length", path.cost, best.path.cost, path.path.length));
-                best.path = path;
-                best.ep   = ep;
-            }
+            if (path) {
+                if (path.path.length > 0 && path.cost < best.path.cost) {
+                    //console.log(util.format("found new best path, cost: %d, old best %d, length", path.cost, best.path.cost, path.path.length));
+                    best.path = path;
+                    best.ep = ep;
+                }
+            } 
         }
-        // add path to tree, remove endpoint
-        if (best.path.path.length > 0) {
-            T.addPathFromGraph(G, best.path.path);
-            wgutil.removeArrObj(EP, best.ep);
-            //fs.writeFileSync(util.format("wire-graph-%d.svg", ++i), svgexport.ExportGraphToSVG(T));
-            if (i > EndPoints.length) {
-                return T;
+        if (best.path.path) {
+            // add path to tree, remove endpoint
+            if (best.path.path.length > 0) {
+                T.addPathFromGraph(G, best.path.path);
+                wgutil.removeArrObj(EP, best.ep);
+                //fs.writeFileSync(util.format("wire-graph-%d.svg", ++i), svgexport.ExportGraphToSVG(T));
+                if (i > EndPoints.length) {
+                    return T;
+                }
             }
+        } else {
+            // tree is isolated (no endpoints connect to this tree)
+            // -> insert new endpoint into tree (may become new tree)
+            if (!G.forestRoots) G.forestRoots = [];
+            var ep = EP[0];
+            var v = G.isGraphVertex(ep.pos);
+            T.N[v._id] = v;
+            G.forestRoots.push(v);
+            wgutil.removeArrObj(EP, ep);
         }
     }
     return T;

@@ -104,7 +104,8 @@
             "top" : "A.top", 
             "width" : "A.width",
             "height" : "A.height", 
-            "wallid" : "A.wallid"
+            "wallid" : "A.wallid",
+            "endpoint" : "true"
           }
         },
         {
@@ -114,7 +115,8 @@
             "top" : "B.top", 
             "width" : "B.width",
             "height" : "B.height", 
-            "wallid" : "B.wallid"
+            "wallid" : "B.wallid",
+            "endpoint" : "true"
           }
         }
       ]
@@ -147,7 +149,8 @@
             "top" : "B.top", 
             "width" : "B.width",
             "height" : "B.height", 
-            "wallid" : "B.wallid"
+            "wallid" : "B.wallid",
+            "endpoint" : "true"
           }
         }
       ]

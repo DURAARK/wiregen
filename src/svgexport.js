@@ -76,9 +76,10 @@ function ExportTerminalsToSVG(symbols)
             }
         }
     });
-
+    
     WALLS.forEach(function (symbol) {
         var att = symbol.attributes;
+        result[att.id] += '<text x="10" y="20" fill="black">' + att.id + '</text>'
         result[att.id] += '</svg>\n'; 
     });
 
