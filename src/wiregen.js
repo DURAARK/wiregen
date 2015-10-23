@@ -82,13 +82,13 @@ Symbols.forEach(function (s) {
 
 
 // -------------------------------------------------------------------------------
+console.log("evaluating grammar...");
 // evaluate the grammar
 var steps = 0;
 while(grammar.evaluateGrammarStep(Symbols, TerminalSymbols, Grammar))
 {
     steps = steps + 1;
 }
-
 console.log("evaluation took " + steps + " steps.");
 
 // collect walls
@@ -103,7 +103,7 @@ TerminalSymbols.forEach(function (t) {
     }
     if (t.label == "socket") numSockets = numSockets + 1;
     if (t.label == "switch") numSwitches = numSwitches + 1;
-    if (t.label == "vgroup") console.log("vgroup height:" + t.attributes.height);
+    //if (t.label == "vgroup") console.log("vgroup height:" + t.attributes.height);
 });
 console.log("found " + numWalls + " walls, " + numSwitches + " switches and " + numSockets + " sockets.");
 
@@ -302,8 +302,9 @@ var epstat = { 'socket': 0, 'switch': 0 };
 for (var e in EndPoints) {
     epstat[EndPoints[e].terminal.label] = epstat[EndPoints[e].terminal.label] + 1;
 }
-console.log(epstat);
+console.log("Endpoints:" + epstat);
 
+console.log("Connecting walls...");
 // Connect wall segments
 var WALLCONN = {};
 
@@ -457,8 +458,10 @@ function findWireTree(G, root, EndPoints)
     return T;
 }
 
+console.log("Extracting wire hypothesis...");
 var WireTree = findWireTree(G, ROOT, EndPoints);
 
+console.log("writing output...");
 
 fs.writeFileSync(util.format("%s/iz-graph.json",program.output), JSON.stringify(G));
 fs.writeFileSync(util.format("%s/iz-graph.dot", program.output), G.exportToGraphViz());
