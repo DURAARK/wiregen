@@ -39,11 +39,11 @@ function ExportTerminalsToSVG(symbols, imgprefix, flip)
     // initialize wall svgs
     WALLS.forEach(function (symbol) {
         var att = symbol.attributes;
-        result[att.id] = util.format('<svg width="%s" height="%s" version="1.1" xmlns="http://www.w3.org/2000/svg">\n', resultbb[att.id].width() * s, resultbb[att.id].height() * s);
+        result[att.id] = util.format('<svg width="%s" height="%s" version="1.1" xmlns="http://www.w3.org/2000/svg">\n', att.width * s, att.height * s);
         
         if (imgprefix) {
-            result[att.id] += util.format('<image xlink:href="%s_%s.jpg" y="0" width="%d" height="%d"', imgprefix, att.id, resultbb[att.id].width() * s, resultbb[att.id].height() * s);
-            if (flip) {
+            result[att.id] += util.format('<image xlink:href="%s_%s.jpg" y="0" width="%d" height="%d"', imgprefix, att.id, att.width * s, att.height * s);
+            if (flip==true || flip=="true") {
                 result[att.id] += util.format(' transform="scale(-1,1)" x="%d" ', -resultbb[att.id].width() * s);
             } else {
                 result[att.id] += ' x="0" ';
@@ -51,7 +51,7 @@ function ExportTerminalsToSVG(symbols, imgprefix, flip)
             
             result[att.id] += ' />\n';
         } else {
-            result[att.id] += util.format('<rect width="%d" height="%d" style="fill:rgb(240,240,240);stroke-width:3;stroke:rgb(0,0,0)" />\n', bb.width() * s, bb.height() * s);
+            result[att.id] += util.format('<rect width="%d" height="%d" style="fill:rgb(240,240,240);stroke-width:3;stroke:rgb(0,0,0)" />\n', resultbb[att.id].width() * s, resultbb[att.id].height() * s);
         }
         //result[att.id] += util.format('<rect width="%d" height="%d" style="fill:rgb(240,240,240);stroke-width:3;stroke:rgb(0,0,0)" />\n', resultbb[att.id].width() * s, resultbb[att.id].height() * s);
     });
@@ -78,10 +78,10 @@ function ExportTerminalsToSVG(symbols, imgprefix, flip)
                     result[att.wallid] += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:rgb(200,200,100);stroke-width:3;stroke:rgb(0,0,0)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
                     break;
                 case "socket":
-                    result[att.wallid] += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,200,0)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
+                    result[att.wallid] += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,0,200)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
                     break;
                 case "switch":
-                    result[att.wallid] += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,0,200)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
+                    result[att.wallid] += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,200,0)" />\n', att.left*s, att.top*s, att.width*s, att.height*s);
                     break;
                 case "vgroup":
                     result[att.wallid] += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(200,200,0)" />\n', att.left * s, att.top * s, att.width * s, att.height * s);
@@ -120,7 +120,7 @@ function ExportGraphToSVG(G, wallid, bb, imgprefix, flip)
     
     if (imgprefix) {
         result += util.format('<image xlink:href="%s_%s.jpg" y="0" width="%d" height="%d"', imgprefix, wallid, bb.width() * s, bb.height() * s);
-        if (flip) {
+        if (flip == true || flip == "true") {
             result += util.format(' transform="scale(-1,1)" x="%d" ', -bb.width() * s);
         } else {
             result += ' x="0" ';
@@ -141,10 +141,10 @@ function ExportGraphToSVG(G, wallid, bb, imgprefix, flip)
                 var att = v.terminal.attributes;
                 switch (v.terminal.label) {
                     case "socket":
-                        result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,200,0)" />\n', att.left * s, att.top * s, att.width * s, att.height * s);
+                        result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,0,200)" />\n', att.left * s, att.top * s, att.width * s, att.height * s);
                         break;
                     case "switch":
-                        result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,0,200)" />\n', att.left * s, att.top * s, att.width * s, att.height * s);
+                        result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,200,0)" />\n', att.left * s, att.top * s, att.width * s, att.height * s);
                         break;
                     case "root":
                         result += util.format('<rect x="%d" y="%d" width="%d" height="%d" style="fill:none;stroke-width:3;stroke:rgb(0,0,200)" />\n', att.left * s, att.top * s, att.width * s, att.height * s);
