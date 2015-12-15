@@ -30,7 +30,7 @@
       "top" : 1350,
       "width" : 128,
       "height" : 128,
-      "weight:" : 0.8,
+      "weight" : 0.8,
       "wallid" : "wall01_1_01"
     }
   },
@@ -41,7 +41,7 @@
       "top" : 1200,
       "width" : 128,
       "height" : 128,
-      "weight:" : 0.8,
+      "weight" : 0.8,
       "wallid" : "wall01_1_01"
     }
   },
@@ -49,10 +49,10 @@
     "label": "SOCKET",
     "attributes": {
       "left" : 2000,
-      "top" : 2036,
+      "top" : 2186,
       "width" : 128,
       "height" : 128,
-      "weight:" : 0.8,
+      "weight" : 0.8,
       "wallid" : "wall01_1_01"
     }
   },
@@ -60,10 +60,10 @@
     "label": "SOCKET",
     "attributes": {
       "left" : 2150,
-      "top" : 2036,
+      "top" : 2186,
       "width" : 128,
       "height" : 128,
-      "weight:" : 0.8,
+      "weight" : 0.8,
       "wallid" : "wall01_1_01"
     }
   },
@@ -71,10 +71,10 @@
     "label": "SOCKET",
     "attributes": {
       "left" : 2300,
-      "top" : 2036,
+      "top" : 2186,
       "width" : 128,
       "height" : 128,
-      "weight:" : 0.8,
+      "weight" : 0.8,
       "wallid" : "wall01_1_01"
     }
   },
